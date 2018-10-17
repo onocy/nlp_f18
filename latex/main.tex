@@ -1,0 +1,71 @@
+
+\documentclass[11pt,a4paper]{article}
+\usepackage[hyperref]{naaclhlt2019}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{graphicx}
+
+\usepackage{url}
+
+\aclfinalcopy 
+
+\title{Your proposed project title here}
+
+\author{First Author \\
+  {\tt email@domain} \\\And
+  Second Author \\
+  {\tt email@domain} \\\And
+  Third Author \\
+  {\tt email@domain} \\\And
+  Fourth Author \\
+  {\tt email@domain} \\}
+  
+% \setlength\textwidth{16.0cm}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+Tell us what problem you're going to work on. Provide some motivation for your idea: why is it interesting? Does it have any practical significance? 
+
+Some general guidelines for this proposal document: 2-4 pages, due Oct. 19. We highly recommend using this LaTeX template to write your proposal, but if you end up using some other word processing software, please include all of the sections that are in this template.
+
+\section{Related work}
+Have others worked on this idea or related ideas? Clearly describe the approaches of at least two other papers, along with some pros and cons. To look for relevant papers, check out the top NLP conferences (e.g., ACL, EMNLP, NAACL, TACL). Make sure to properly cite them. You can cite a paper parenthetically like this~\cite{andrew2007scalable} or use the citation as a proper noun, as in ``\newcite{borsch2011} show that...'' If you're not familiar with LaTeX, you'll have to add entries to \emph{yourbib.bib} to get them to show up when you cite them. 
+
+\section{Your approach}
+How do you plan to solve the problem you chose? Will you approach it differently from previous work or do you plan to try to replicate an existing paper?\footnote{If you choose replication, remember that you have to implement the majority of the code yourself! Do not just copy the authors' Github code, because we will find out.} Remember that this project should take $\sim 2$ months of work!
+
+\paragraph{What baseline algorithms will you use?}
+A baseline algorithm is one that is very simple and trivial to implement. For example, “predict the most common class,” or “tag all capitalized words as names,” or “select the first sentence in the document”. Sometimes it can be difficult to get a fancy algorithm to beat a baseline. “Always ask yourself, ‘What’s the simplest experiment I could do to (in)validate my hypothesis?’ Talented researchers have a knack for coming up with simple baselines.”
+
+\subsection{Milestones \& Schedule}
+Divide your project into subtasks and estimate how much time each will take. If your group plans to divide subtasks amongst itself, also write who will be responsible for each milestone. If you plan to work on everything together, please say so here. Definitely budget some time for writing the progress report and final report, as well as performing an in-depth analysis of any models you build and/or data you collect. Sample schedule below:
+\begin{enumerate}
+    \item Acquire and preprocess data (1 week)
+    \item Build models for task (3 weeks)
+    \item Write progress report! (due Nov. 16)
+    \item Analyze the output of the model, do an error analysis (2 weeks)
+    \item Work on final report and presentation (2 weeks)
+\end{enumerate}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figs/sentence.png}
+    \caption{Please feel free to include figures! If you want your figure to span both columns, use \emph{figure*} instead of \emph{figure}.}
+    \label{fig:example}
+\end{figure}
+
+\section{Data}
+What text data do you plan to use in your project? Where will you get it from? Will you be annotating text yourselves? Convince us that it is available for you, and that you can easily get it, and that it is appropriate for the task and research questions you care about.
+
+\section{Tools}
+What existing libraries or toolkits are you going to use? Some questions to think about: will you be doing any preprocessing of your data such as tokenization or parsing? Will you be training logistic regression models? Will you be using deep learning libraries? Will you need to use any services for GPUs?\footnote{if so, check out \url{https://colab.research.google.com}!} Do you need to use crowdsourcing?
+
+\bibliographystyle{apalike}
+\footnotesize
+\bibliography{yourbib}
+
+
+\end{document}
