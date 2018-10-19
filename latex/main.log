@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  19 OCT 2018 16:31
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  19 OCT 2018 17:36
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -372,46 +372,41 @@ Missing character: There is no ‚ in font ptmr7t!
 Missing character: There is no Ä in font ptmr7t!
 Missing character: There is no ù in font ptmr7t!
 
-Underfull \hbox (badness 1062) in paragraph at lines 70--71
+Underfull \hbox (badness 1515) in paragraph at lines 68--69
+[]\OT1/ptm/m/n/10.95 Build sim-ple model us-ing Bayes Net (1
+ []
+
+
+Underfull \hbox (badness 1062) in paragraph at lines 73--74
 []\OT1/ptm/m/n/10.95 Work on fi-nal re-port and pre-sen-ta-tion (2
  []
 
-<figs/sentence.png, id=23, 426.393pt x 293.095pt>
-File: figs/sentence.png Graphic file (type png)
- <use figs/sentence.png>
-Package pdftex.def Info: figs/sentence.png used on input line 75.
-(pdftex.def)             Requested size: 227.62204pt x 156.46213pt.
 
-Overfull \hbox (8.53592pt too wide) in paragraph at lines 75--76
- [][] 
- []
-
-
-Underfull \hbox (badness 5217) in paragraph at lines 89--89
+Underfull \hbox (badness 5217) in paragraph at lines 85--85
 [][][]\OT1/ptm/m/n/9 if so, check out [][]$\OT1/pcr/m/n/9 https : / / colab . r
 esearch .
  []
 
 (./main.bbl)
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 97.
- [2 <./figs/sentence.png>]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 97.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 93.
+ [2]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 93.
  (./main.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 97.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 97.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 93.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 93.
 Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 97.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 93.
  )
 (\end occurred when \iffalse on line 346 was incomplete) 
 Here is how much of TeX's memory you used:
- 7098 strings out of 493014
- 106700 string characters out of 6133351
- 196307 words of memory out of 5000000
- 10550 multiletter control sequences out of 15000+600000
- 27606 words of font info for 62 fonts, out of 8000000 for 9000
+ 7084 strings out of 493014
+ 106477 string characters out of 6133351
+ 196157 words of memory out of 5000000
+ 10540 multiletter control sequences out of 15000+600000
+ 24337 words of font info for 58 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 43i,10n,40p,504b,354s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 43i,10n,40p,504b,318s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/201
 6/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/texlive/2016/texmf-dist/fo
 nts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2016/texmf-dist/font
@@ -420,10 +415,10 @@ s/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2016/texmf-dist/fonts
 rw/times/utmb8a.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/urw/times/u
 tmr8a.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/urw/times/utmri8a.pfb
 >
-Output written on main.pdf (2 pages, 93754 bytes).
+Output written on main.pdf (2 pages, 76571 bytes).
 PDF statistics:
- 75 PDF objects out of 1000 (max. 8388607)
+ 73 PDF objects out of 1000 (max. 8388607)
  62 compressed objects within 1 object stream
- 21 named destinations out of 1000 (max. 500000)
- 6 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 22 named destinations out of 1000 (max. 500000)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
