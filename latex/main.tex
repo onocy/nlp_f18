@@ -55,7 +55,9 @@ The simple methods of N-grams and SVMs had on average 52.5\% accuracy, so this i
 However, choosing features might be a tedious task, especially if we want additional features more than ones already used previously. 
 
 \section{Your approach}
-How do you plan to solve the problem you chose? Will you approach it differently from previous work or do you plan to try to replicate an existing paper?\footnote{If you choose replication, remember that you have to implement the majority of the code yourself! Do not just copy the authors' Github code, because we will find out.} Remember that this project should take $\sim 2$ months of work!
+We will begin by assembling labeled training data mapping artist names to their respective song lyrics. To start, we'll create a simple Bayes Net model to predict the most likely artist given a string of lyrics. Afterwards, we'll be moving on to more advanced models such as RNN's, where we will aim for better accuracy and prediction of which artist is most likely to have written a given song. 
+
+When our model is developed, we will analyze the results by projecting the parameters for each artist onto a 2-dimensional space, highlighting the degree of similarity between lyrics used by all artists in our training data. This will help us better understand whether popular artists are truly the ones with unique lyricism.
 
 \paragraph{What baseline algorithms will you use?}
 A baseline algorithm is one that is very simple and trivial to implement. For example, “predict the most common class,” or “tag all capitalized words as names,” or “select the first sentence in the document”. Sometimes it can be difficult to get a fancy algorithm to beat a baseline. “Always ask yourself, ‘What’s the simplest experiment I could do to (in)validate my hypothesis?’ Talented researchers have a knack for coming up with simple baselines.”
