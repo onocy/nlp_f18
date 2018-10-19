@@ -1,15 +1,12 @@
 \begin{thebibliography}{}
 
-\bibitem[Andrew and Gao, 2007]{andrew2007scalable}
-Andrew, G. and Gao, J. (2007).
-\newblock Scalable training of {L1}-regularized log-linear models.
-\newblock In {\em Proceedings of the 24th International Conference on Machine
-  Learning}, pages 33--40.
+\bibitem[Alexandros, 2017]{Tsaptsinos}
+Alexandros, T. (2017).
+\newblock {\em Lyrics Based Music Genre Classification Using a Hierarchical
+  Attention Network}.
 
-\bibitem[Borschinger and Johnson, 2011]{borsch2011}
-Borschinger, B. and Johnson, M. (2011).
-\newblock A particle filter algorithm for {B}ayesian wordsegmentation.
-\newblock In {\em Proceedings of the Australasian Language Technology
-  Association Workshop 2011}, pages 10--18, Canberra, Australia.
+\bibitem[Michael and Caroline, 2014]{FellAnndSporleder}
+Michael, F. and Caroline, S. (2014).
+\newblock {\em Lyrics-based Analysis and Classification of Music}.
 
 \end{thebibliography}
