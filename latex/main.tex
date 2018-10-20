@@ -35,7 +35,14 @@ Some of the greatest artists of all time are renown for their unique use of lyri
 
 
 \section{Related work}
-There exists many research projects on the topic of music genre classification. \newcite{Tsaptsinos} attempts to classify music genres from lyrics using Hierarchical Attention Networks (HAN). 
+There exists many research projects on the topic of artist classification using lyrics. \newcite{GuoAndKhamphoune} try to predict hip hop artists from hip hop lyrics. They focus their research on 4 specific artists: Eminem, Nicki Minaj, Kanye West and Nas. They acquired 30-35 songs for each artist.
+Their approaches consist of Multinomial Naive Bayes, SVM and Decision Trees.
+For each of these models, they utilize 2 different feature vectors. The first is a simple bag of words. They selected the 16 most frequent words for each artist. The second feature vector consists of 16 most significant words for each artist, handpicked by Guo and Khamphoune themselves.
+The hand selected features utilized with the Naive Bayes had a percent error of just 20\%, so this is a process that works quite well. Both SVMs and Decision Trees with the hand selected features had a percent error of 35\%. Then Naive Bayes and Decision Trees with the objective features performed at a percent error of a little below 30\%. The SVM in comparison had a percent error of 35\% when utilized with the objective features.
+However, the research investigates only 4 artists. These 4 artists were hand picked due to their distinguishable differences in lyrical content. For example, Eminem raps about his negligent mother while Nicki Minaj raps about feminism and her conflicts with other female rappers. The result of classification with a wider range of artists could possible suffer in accuracy. 
+
+A related idea to artist classification is genre classification. Each artist could be in a broader sense thought of as a genre themselves. Each artist is associated with different lyrics similar to how each genre consists of different lyrics.
+ \newcite{Tsaptsinos} attempts to classify music genres from lyrics using Hierarchical Attention Networks (HAN). 
 HAN outperforms N-gram, SVM, KNN and Naive Bayes by utilizing the property that words combine to make lines, lines combine to make segments, and segments combine to make the entire lyrical content.
 It recognizes that the semantics of lyrics are embedded in the ordering of content within these levels. 
 HAN works by extracting these layers and learning the importance of words, lines and segments. 
@@ -44,15 +51,6 @@ GloVe outperforms similar word2vec and SVM based models.
 A benefit of this approach is we do not have to hand pick features.
 A negative aspect of this approach is that we do not possess familiarity with the processes, and there would be a learning curve for using both HAN and GloVe. 
 This approach performs with an accuracy of 49.50\% whereas a higher value would be ideal. 
-
-In an additional paper, \newcite{FellAnndSporleder} try to classify genre, distinguish quality, and determine the release year of a chosen lyrical passage. 
-Unlike Tsaptsinos, Fell \& Sporleder do not use a kind of Neural Network. 
-Instead they designed 13 total features including top 100 n-grams, type-token ratio, slang words, part of speech/chunk tags, length of lines, echoisms, rhyme features, imagery, pronouns, past tense, chorus, title and repetitive structures. 
-As baseline, they used a simple N-gram model. 
-For their main approach they make use of the stylistic features, which are the latter 12 features, along with SVMs. 
-Here the thoroughly developed features capture the core aspects of a songs lyrical content. 
-The simple methods of N-grams and SVMs had on average 52.5\% accuracy, so this is a process that works quite well. 
-However, choosing features might be a tedious task, especially if we want additional features more than ones already used previously. 
 
 \section{Your approach}
 We will begin by assembling labeled training data mapping artist names to their respective song lyrics. To start, we'll create a baseline Bayes Net model to predict the most likely artist given a string of lyrics. Afterwards, we'll be moving on to more advanced models such as RNN's, where we will aim for better accuracy and prediction of which artist is most likely to have written a given song. 
