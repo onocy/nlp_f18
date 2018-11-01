@@ -1,6 +1,4 @@
 import numpy as np
-from sklearn import decomposition
-from collections import Counter
 
 
 def compute_pca(A, num_dimensions):
@@ -13,6 +11,9 @@ def compute_pca(A, num_dimensions):
         np.ndarray: A matrix of size (len(A) x num_dimensions) containing the uncorrelated principal
           components of A
     """
+
+    from sklearn import decomposition
+
     pca = decomposition.PCA(n_components=num_dimensions)
     return pca.fit_transform(A)
 
