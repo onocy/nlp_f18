@@ -71,7 +71,7 @@ def tokenize_csv(f, artist_col, lyric_col):
     import csv
     import re
 
-    # NLTK complains and fails to tokenize without this. May be different on your machine.
+    # TODO: To save time, avoid performing this check if punkt is already downloaded.
     nltk.download('punkt')
 
     artist_lyrics = {}
