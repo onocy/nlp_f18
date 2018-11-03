@@ -86,3 +86,30 @@ def tokenize_csv(f, artist_col, lyric_col):
             artist_lyrics[artist] += lyrics
 
     return artist_lyrics
+
+
+def load_word_embeddings(f, unzip=False):
+    """
+    Loads word embeddings from a specified file
+    Args:
+        f (str): The path to a file containing word embeddings
+    Optional:
+        unzip (bool): True if the file specified is a .zip, False by default
+    Returns:
+        dict[str, np.ndarray]: A mapping from words to their embedding vectors
+    """
+    if unzip:
+        import zipfile
+        vec_file = zipfile.ZipFile(f, 'r').open(f[:-4], 'r')
+    else:
+        vec_file = open(f, 'r')
+
+    vocab = {}
+    for line in vec_file:
+        split = line.strip().split()
+        word = split[0].lower()
+        if word not in vocab:
+            vocab[word] = np.zeros((1, len(split) - 1))
+        vocab[word] = np.array(split[1:], dtype='float32')
+
+    return vocab
