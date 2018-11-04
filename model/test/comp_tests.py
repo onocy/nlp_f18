@@ -1,9 +1,9 @@
 import unittest
 import numpy as np
-from util import compute_pca, compute_song_vector, compute_artist_vector, tokenize_csv
+from util.computation import compute_pca, compute_song_vector, compute_artist_vector, lyrics_to_word_matrix
 
 
-class UtilTests(unittest.TestCase):
+class ComputationTests(unittest.TestCase):
 
     def test_compute_pca(self):
         # Test on a 4 x 5 matrix
@@ -35,7 +35,11 @@ class UtilTests(unittest.TestCase):
 
         self.assertTrue(np.array_equal(compute_artist_vector(S), np.mean(S, axis=0)))
 
-    def test_tokenize_csv(self):
-        artist_dict = tokenize_csv('test/song_test.csv', artist_col=0, lyric_col=2)
-        self.assertTrue(artist_dict['artist1'], ['hey', 'this', 'is', 'text'])
-        self.assertTrue(artist_dict['artist2'], ['more', 'words', 'and', 'lyrics', 'hello', 'world'])
+    def test_lyrics_to_word_matrix(self):
+        sample_vocab = {'a': np.array([1, 2, 3]),
+                        'hi': np.array([0, 5, 7]),
+                        'bye': np.array([3, 3, 3])}
+        lyrics = ['a', 'a', 'hi', 'bye', 'bye']
+
+        M = lyrics_to_word_matrix(lyrics, sample_vocab)
+        self.assertTrue(np.array_equal(M, np.array([sample_vocab[w] for w in lyrics])))

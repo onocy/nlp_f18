@@ -1,3 +1,6 @@
+"""Computation utility functions to manipulating word, song and artist vectors
+"""
+
 import numpy as np
 
 
@@ -56,60 +59,23 @@ def compute_artist_vector(S, reduce_to=None, f=lambda v: np.mean(v, axis=0)):
     return f(S)
 
 
-def tokenize_csv(f, artist_col, lyric_col):
+def lyrics_to_word_matrix(lyrics, vocab):
     """
-    Tokenizes a csv file containing (artist -> lyric) mappings
+    Converts a string of song lyrics to a matrix whose rows are word embedding vectors
     Args:
-        f (str): The name of the csv file to be tokenized
-        artist_col (int): A 0-indexed integer denoting the column in the csv corresponding to artist names
-        lyric_col (int): A 0-indexed integer denoting the column in the csv corresponding to lyric strings
+        lyrics (list[str]): A list of strings representing a song
+        vocab (dict[str: np.ndarray]): A dictionary mapping words to their embedding vectors
     Returns:
-        dict[str, list[str]]: A dictionary mapping artist names to a list containing all of their song lyrics
+        np.ndarray: A (len(lyrics) x embedding_size) matrix with a word embedding row for each word in the lyric string
     """
 
-    import nltk
-    import csv
-    import re
+    # We need some way to determine the size of each of the word embeddings. Here we are assuming the vocabulary
+    # has an embedding for the word 'a', which seems like a reasonable assumption given the scope of this project
+    M = np.zeros((len(lyrics), len(vocab['a'])))
 
-    # TODO: To save time, avoid performing this check if punkt is already downloaded.
-    nltk.download('punkt')
+    for i, word in enumerate(lyrics):
+        embedding = vocab.get(word)
+        if embedding is not None:
+            M[i] = embedding
 
-    artist_lyrics = {}
-    with open(f) as file:
-        file_csv = csv.reader(file, quotechar='"')
-
-        for row in file_csv:
-            artist = row[artist_col]
-            lyrics = nltk.word_tokenize(re.sub('\'|,|\(|\)|\?|\!', '', row[lyric_col].lower()))
-            if artist not in artist_lyrics:
-                artist_lyrics[artist] = []
-            artist_lyrics[artist] += lyrics
-
-    return artist_lyrics
-
-
-def load_word_embeddings(f, unzip=False):
-    """
-    Loads word embeddings from a specified file
-    Args:
-        f (str): The path to a file containing word embeddings
-    Optional:
-        unzip (bool): True if the file specified is a .zip, False by default
-    Returns:
-        dict[str, np.ndarray]: A mapping from words to their embedding vectors
-    """
-    if unzip:
-        import zipfile
-        vec_file = zipfile.ZipFile(f, 'r').open(f[:-4], 'r')
-    else:
-        vec_file = open(f, 'r')
-
-    vocab = {}
-    for line in vec_file:
-        split = line.strip().split()
-        word = split[0].lower()
-        if word not in vocab:
-            vocab[word] = np.zeros((1, len(split) - 1))
-        vocab[word] = np.array(split[1:], dtype='float32')
-
-    return vocab
+    return M
