@@ -40,6 +40,7 @@ if __name__ == '__main__':
 
     learner = Learner('../songdata.csv')
     artists = learner.learn_artists()
+    pickle_object(learner, 'learner.pickle')
 
     # 2-D orthogonal basis
     B = np.eye(50)[:, :2].T

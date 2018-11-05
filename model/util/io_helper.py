@@ -67,3 +67,17 @@ def load_word_embeddings(f, unzip=False):
         vocab[word] = np.array(split[1:], dtype='float32')
 
     return vocab
+
+
+def pickle_object(obj, filename):
+    """
+    Pickles a given object into a file with the given file name
+    Args:
+        obj (object): A python object
+        filename (str): The name of the file to write the object to
+    """
+
+    import pickle
+
+    outfile = open(filename, 'wb')
+    pickle.dump(obj, outfile)
