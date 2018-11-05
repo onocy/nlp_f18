@@ -79,3 +79,22 @@ def lyrics_to_word_matrix(lyrics, vocab):
             M[i] = embedding
 
     return M
+
+
+def project_onto_subspace(v, B):
+    """
+    Projects the given vector v onto a subspace spanned by orthogonal basis vectors B
+    Args:
+        v (np.ndarray): A vector
+        B (np.ndarray): A matrix containing k orthogonal basis vectors
+    Returns:
+        np.ndarray: A (n x 1) vector that is the least squares projection of Bx = v
+    """
+
+    def project(v, u):
+        """Projects a vector v onto a vector u
+        """
+        return (np.dot(v, u)/np.dot(u, u)) * u
+
+    return sum(project(v, b_i) for b_i in B)[:len(B)]
+
