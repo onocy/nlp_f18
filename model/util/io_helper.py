@@ -28,6 +28,9 @@ def tokenize_csv(f, artist_col, song_col, lyric_col):
     with open(f) as file:
         file_csv = csv.reader(file, quotechar='"')
 
+        # Skip the header row
+        next(file_csv)
+
         for row in file_csv:
             artist = row[artist_col]
             song = row[song_col]
