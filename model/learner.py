@@ -36,7 +36,7 @@ class Learner(object):
 
 
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
+    from plotter import plot_coords_with_labels
 
     learner = Learner('../songdata.csv')
     artists = learner.learn_artists()
@@ -46,11 +46,8 @@ if __name__ == '__main__':
     artist_projections = {artist : project_onto_subspace(v, B) for artist, v in artists.items()}
     print(artist_projections)
 
-    for artist in ['Kanye West', 'Eminem', 'Drake', 'Lil Wayne', 'Chris Brown', 'Flo-Rida',
-                   'J Cole', 'Mc Hammer', 'Migos', 'Ne-Yo', 'Nicki Minaj', 'Pitbull', 'Snoop Dogg', 'The Weeknd']:
-        x, y = artist_projections[artist]
-        plt.plot(x, y, 'bo')
-        plt.text(x * (1 + 0.01), y * (1 + 0.01), artist, fontsize=12)
-
-    plt.show()
+    artists = ['Kanye West', 'Eminem', 'Drake', 'Lil Wayne', 'Chris Brown', 'Flo-Rida', 'J Cole', 'Mc Hammer',
+                'Migos', 'Ne-Yo', 'Nicki Minaj', 'Pitbull', 'Snoop Dogg', 'The Weeknd']
+    coord_dict = {artist : artist_projections[artist] for artist in artists}
+    plot_coords_with_labels(coord_dict)
 
