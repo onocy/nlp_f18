@@ -46,11 +46,11 @@ if __name__ == '__main__':
     # 2-D orthogonal basis
     B = np.eye(50)[:, :2].T
     artist_projections = {artist : project_onto_subspace(v, B) for artist, v in artists.items()}
+    print(artist_projections)
 
     artists = ['Kanye West', 'Eminem', 'Drake', 'Lil Wayne', 'Chris Brown', 'Flo-Rida', 'J Cole', 'Mc Hammer',
                 'Migos', 'Ne-Yo', 'Nicki Minaj', 'Pitbull', 'Snoop Dogg', 'The Weeknd']
     coord_dict = {artist : artist_projections[artist] for artist in artists}
     plot_coords_with_labels(coord_dict)
 
-    print("about to test")
     validation_score = validate(artists, learner.artist_dict, learner.vocab)

@@ -58,6 +58,7 @@ def compute_artist_vector(S, reduce_to=None, f=lambda v: np.mean(v, axis=0)):
         return f(compute_pca(S, num_dimensions=reduce_to))
     return f(S)
 
+
 def lyrics_to_word_matrix(lyrics, vocab):
     """
     Converts a string of song lyrics to a matrix whose rows are word embedding vectors
