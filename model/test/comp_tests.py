@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from util.computation import compute_pca, compute_song_vector, compute_artist_vector, find_closest_artist, lyrics_to_word_matrix
+from util.computation import compute_pca, compute_song_vector, compute_artist_vector, lyrics_to_word_matrix
 
 
 class ComputationTests(unittest.TestCase):
@@ -34,12 +34,6 @@ class ComputationTests(unittest.TestCase):
                       [7, 8, 9]])
 
         self.assertTrue(np.array_equal(compute_artist_vector(S), np.mean(S, axis=0)))
-
-    def test_find_closest_artist(self):
-        E = {"artist_1": [1, 0, 0], "artis2": [0, 1, 0], "artist_3": [0, 0, 1]}
-        av = [1, 0, 0]
-
-        self.assertTrue(np.array_equal(find_closest_artist(E, av)[1], E["artist_1"]))
 
     def test_lyrics_to_word_matrix(self):
         sample_vocab = {'a': np.array([1, 2, 3]),

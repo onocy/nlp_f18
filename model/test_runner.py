@@ -20,7 +20,6 @@ def add_computation_tests(suite):
     suite.addTest(ComputationTests('test_compute_pca'))
     suite.addTest(ComputationTests('test_compute_song_vector'))
     suite.addTest(ComputationTests('test_compute_artist_vector'))
-    suite.addTest(ComputationTests('test_find_closest_artist'))
     suite.addTest(ComputationTests('test_lyrics_to_word_matrix'))
 
 

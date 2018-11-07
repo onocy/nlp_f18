@@ -2,7 +2,6 @@
 """
 
 import numpy as np
-import scipy as sp
 
 
 def compute_pca(A, num_dimensions):
@@ -58,19 +57,6 @@ def compute_artist_vector(S, reduce_to=None, f=lambda v: np.mean(v, axis=0)):
     if reduce_to:
         return f(compute_pca(S, num_dimensions=reduce_to))
     return f(S)
-
-
-def find_closest_artist(E, av):
-    """
-    Finds the closest artist to the given artist vector in a set of learned artist vectors
-    Args:
-        E  (dict[str, np.ndarray]): A dictionary mapping artist names to the artist embedding
-        av (np.ndarray): A vector representing an arbitrary artist
-    Returns:
-        np.ndarray: A vector embedding representation of the closest artist in the embedding dict
-    """
-    return min(E.items(), key=lambda x: sp.spatial.distance.cosine(x[1], av)) 
-
 
 def lyrics_to_word_matrix(lyrics, vocab):
     """

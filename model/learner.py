@@ -1,5 +1,6 @@
 from util.computation import *
 from util.io_helper import *
+from validator import validate
 
 
 class Learner(object):
@@ -34,19 +35,6 @@ class Learner(object):
 
         return embeddings
 
-    def test_artists(self, embeddings):
-        """
-        Test the learned vector embeddings
-        """
-        S = []
-        for song in self.artist_dict["Adam Sandler"]:
-            W = lyrics_to_word_matrix(self.artist_dict["Adam Sandler"][song], self.vocab)
-            sv = compute_song_vector(W)
-            S.append(sv)
-
-        av = compute_artist_vector(np.array(S))
-        print(find_closest_artist(embeddings, av))
-
 
 if __name__ == '__main__':
     from plotter import plot_coords_with_labels
@@ -64,4 +52,5 @@ if __name__ == '__main__':
     coord_dict = {artist : artist_projections[artist] for artist in artists}
     plot_coords_with_labels(coord_dict)
 
-    learner.test_artists(artists)
+    print("about to test")
+    validation_score = validate(artists, learner.artist_dict, learner.vocab)
