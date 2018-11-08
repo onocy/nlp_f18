@@ -12,7 +12,8 @@ def validate(artist_embeddings, artist_dict, vocab):
     """
     artists = list(artist_dict.keys())
     # change second argument value to desired # of artists to test
-    test_artists = random.sample(artists, 50)
+    # there are 643 total artists in the dataset
+    test_artists = random.sample(artists, 643)
 
     print("sanity validation {}%".format(sanity_validate(artist_embeddings, artist_dict, vocab, test_artists)[0]))
     print("bow validation {}%".format(bow_validate(artist_embeddings, artist_dict, vocab, test_artists)[0]))
@@ -40,11 +41,10 @@ def sanity_validate(artist_embeddings, artist_dict, vocab, test_artists):
         song = random.sample(list(artist_dict[artist]), 1)[0]
         W = lyrics_to_word_matrix(artist_dict[artist][song], vocab)
         sv = compute_song_vector(W)
-        S  = []
-        S.append(sv)
+        S  = [sv]
         av = compute_artist_vector(np.array(S))
 
-        if nearest_neighbors(artist_embeddings, av, 1)[0][0] == artist:
+        if artist in [neigbour[0] for neigbour in nearest_neighbors(artist_embeddings, av, 50)]:
             num_correct += 1
     return ((num_correct/num_total_data_points)*100, num_total_data_points)
 
@@ -71,15 +71,15 @@ def bow_validate(artist_embeddings, artist_dict, vocab, test_artists):
         lyric_bow = set()
         for song in artist_dict[artist]:
             lyric_bow.update(artist_dict[artist][song])
-        random_lyric_words = random.sample(lyric_bow, 50)
+
+        random_lyric_words = random.sample(lyric_bow, 30)
         
         W = lyrics_to_word_matrix(random_lyric_words, vocab)
         sv = compute_song_vector(W)
-        S  = []
-        S.append(sv)
+        S  = [sv]
         av = compute_artist_vector(np.array(S))
 
-        if nearest_neighbors(artist_embeddings, av, 1)[0][0] == artist:
+        if artist in [neigbour[0] for neigbour in nearest_neighbors(artist_embeddings, av, 50)]:
             num_correct += 1
     return ((num_correct/num_total_data_points)*100, num_total_data_points)
 
@@ -92,7 +92,7 @@ def nearest_neighbors(E, av, k):
         av (np.ndarray): A vector representing an arbitrary artist
         k : number of nearest neighbors to return
     Returns:
-        np.ndarray: A vector embedding representation of the closest artist in the embedding dict
+        list: A list of tuples containing the k closest artist vector in E and its similarity metric
     """
     import scipy as sp
 
