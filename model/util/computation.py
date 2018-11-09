@@ -102,7 +102,6 @@ def project_onto_subspace(v, B):
 def create_artist_index(artist_dict):
     """
     Creates a dictionary mapping artist names to a unique integer index
-
     Args:
         artist_dict (dict[dict[str np.ndarray]]): A dictionary mapping artist names to dictionaries of song names,
           which map song names to a matrix of word embeddings
@@ -114,7 +113,29 @@ def create_artist_index(artist_dict):
     return {artist : i for i, artist in enumerate(sorted_artists)}
 
 
-def build_input_data(artist_dict, vocab, artist_indices):
+def create_vocab_index(artist_dict):
+    """
+    Creates a vocabulary mapping each word to a unique integer
+    Args:
+        artist_dict (dict[dict[str, list[str]]]): A dictionary mapping artist names to a dictionary mapping song names
+          to a list of strings corresponding to lyrics to a particular
+    Returns:
+        dict[str, int]: A dictionary mapping every distinct word that appears in artist_dict to a unique integer
+    """
+
+    vocab_index = {'<PAD>': 0}
+    wordset = {word for artist in artist_dict for song in artist_dict[artist] for word in artist_dict[artist][song]}
+
+    # Sort our distinct set of words so the function produces a deterministic ordering
+    distinct_sorted = sorted(list(wordset))
+
+    for i, word in enumerate(distinct_sorted):
+        vocab_index[word] = i + 1
+
+    return vocab_index
+
+
+def build_input_data(artist_dict, vocab_index, artist_indices):
     """
     Creates an input list where each element represents a song, and is a 2-tuple of the format (artist, np.ndarray).
     The first element in each tuple is an integer representing a unique artist, and the second element is a matrix
@@ -123,7 +144,7 @@ def build_input_data(artist_dict, vocab, artist_indices):
     Args:
         artist_dict: (dict[dict[str, np.ndarray]]): A dictionary mapping artist names to dictionaries of song names,
           which map song names to a matrix of word embeddings
-        vocab (dict[str: np.ndarray]): A dictionary mapping words to their word embeddings
+        vocab_index (dict[str: np.ndarray]): A dictionary mapping words to their unique word indices
         artist_indices (dict[str, int]): A dictionary mapping artist names to a unique integer
     Returns
         list((int, np.ndarray)): A list of tuples where the first element is an integer representing an artist, and
@@ -133,7 +154,7 @@ def build_input_data(artist_dict, vocab, artist_indices):
     input_set = []
     for artist in artist_dict:
         for song in artist_dict[artist]:
-            lyric_embeddings = lyrics_to_word_matrix(artist_dict[artist][song], vocab)
-            input_set.append((artist_indices[artist], lyric_embeddings))
+            lyric_indices = [vocab_index.get(word, -1) for word in artist_dict[artist][song]]
+            input_set.append((artist_indices[artist], lyric_indices))
 
     return input_set

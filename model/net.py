@@ -27,6 +27,7 @@ class ArtistNet(nn.Module):
         # Non-linear activation functions for hidden layers
         self.sigmoid = nn.Sigmoid()
         self.tanh = nn.Tanh()
+        self.ReLU = nn.ReLU()
 
         # Create hidden layers
         self.h1 = nn.Linear(self.d_emb, self.d_emb)
@@ -47,11 +48,30 @@ class ArtistNet(nn.Module):
         """
 
         h1_out = self.sigmoid(self.h1(inputs))
-        h2_out = self.sigmoid(self.h2(h1_out))
-        h3_out = self.sigmoid(self.h3(h2_out))
+        h2_out = self.ReLU(self.h2(h1_out))
+        # h3_out = self.ReLU(self.h3(h2_out))
 
-        z = self.out(h3_out)
+        z = self.out(h2_out)
         return self.softmax(z)
+
+    def __input_to_vector(self, s):
+        """
+        Converts an input string of lyrics s into an input vector to the neural network
+        Args:
+            s (str): A string of lyrics
+        Returns:
+            torch.Tensor: A tensor that is an input formation of the string s
+        """
+        import re
+
+        input_tensor = torch.zeros(self.d_emb, dtype=torch.float)
+        word_list = tokenize_string(s, regex=re.compile('\'|,|\(|\)|\?|\!'))
+
+        for i, word in enumerate(word_list[:self.d_emb]):
+            # If the given word does not exist in the vocabulary index, just map it to -1
+            input_tensor[i] = self.vocab.get(word, -1)
+
+        return input_tensor
 
     def train_network(self, training_data, batch_size, learning_rate = 0.05, num_epochs=10, loss_fn=torch.nn.NLLLoss,
                       opt_algo=torch.optim.Adam):
@@ -88,7 +108,7 @@ class ArtistNet(nn.Module):
                 out_vec = torch.zeros(len(batch), dtype=torch.long)
 
                 for i, (artist, lyrics) in enumerate(batch):
-                    song_vector = compute_song_vector(lyrics)
+                    song_vector = lyrics[:self.d_emb]
                     out_vec[i] = artist
                     for j, elem in enumerate(song_vector):
                         in_mat[i, j] = elem
@@ -108,17 +128,13 @@ class ArtistNet(nn.Module):
 
     def predict(self, lyrics):
         """
-        Predicts the artist that made the song containing the corresponding lyrics
+        Predicts the artist that made the song containing the corresponding lyrics (using vocabulary indices)
         Args:
             lyrics (str): A string of words representing lyrics to a song
         Returns:
             str: The name of the artist who created the song
         """
-        import re
-
-        word_list = tokenize_string(lyrics, regex=re.compile('\'|,|\(|\)|\?|\!'))
-        W = lyrics_to_word_matrix(word_list, self.vocab)
-        input_tensor = torch.tensor(torch.mean(torch.tensor(W), 0), dtype=torch.float)
+        input_tensor = self.__input_to_vector(lyrics)
 
         # Get the artist with the highest probability
         prediction = torch.argmax(self(input_tensor)).item()
@@ -128,15 +144,16 @@ class ArtistNet(nn.Module):
 if __name__ == '__main__':
 
     # Load our word embeddings and artist dictionary
-    vocab = load_word_embeddings('../glove.6B.50d.txt')
+    # vocab = load_word_embeddings('../glove.6B.50d.txt')
     # artist_dict = tokenize_csv('../songdata.csv', 0, 1, 3)
     # pickle_object(artist_dict, 'artists.pickle')
     artist_dict = unpickle_object('artists.pickle')
+    vocab_index = create_vocab_index(artist_dict)
 
     artist_indices = create_artist_index(artist_dict)
 
     # Our input data
-    input_data = build_input_data(artist_dict, vocab, artist_indices)
+    input_data = build_input_data(artist_dict, vocab_index, artist_indices)
     print("Built input data.")
 
     # Shuffle our input data and split it into 20% test, 80% training data
@@ -146,11 +163,11 @@ if __name__ == '__main__':
     training_data = input_data[:training_length]
     test_data = input_data[training_length:]
 
-    # Create our neural network
-    net = ArtistNet(50, artist_indices, vocab)
+    # Create our neural network with 250-count song embeddings
+    net = ArtistNet(150, artist_indices, vocab_index)
 
     print("About to train the network!")
 
     # Training time!
-    net.train_network(training_data, batch_size=16, num_epochs=10)
+    net.train_network(training_data, batch_size=16, num_epochs=3)
     pickle_object(net, 'net.pickle')
