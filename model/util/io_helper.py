@@ -34,7 +34,7 @@ def tokenize_csv(f, artist_col, song_col, lyric_col):
         for row in file_csv:
             artist = row[artist_col]
             song = row[song_col]
-            lyrics = nltk.word_tokenize(re.sub('\'|,|\(|\)|\?|\!|\.|\[|\]|`|:|...', '', row[lyric_col].lower()))
+            lyrics = nltk.word_tokenize(re.sub('\'|,|\(|\)|\?|\!', '', row[lyric_col].lower()))
             if artist not in artists:
                 artists[artist] = {}
             artists[artist][song] = lyrics
