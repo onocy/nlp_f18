@@ -98,3 +98,42 @@ def project_onto_subspace(v, B):
 
     return sum(project(v, b_i) for b_i in B)[:len(B)]
 
+
+def create_artist_index(artist_dict):
+    """
+    Creates a dictionary mapping artist names to a unique integer index
+
+    Args:
+        artist_dict (dict[dict[str np.ndarray]]): A dictionary mapping artist names to dictionaries of song names,
+          which map song names to a matrix of word embeddings
+    Returns:
+        dict[str, int]: A dictionary mapping artist names to a unique integer
+    """
+
+    sorted_artists = sorted(artist_dict.keys())
+    return {artist : i for i, artist in enumerate(sorted_artists)}
+
+
+def build_input_data(artist_dict, vocab, artist_indices):
+    """
+    Creates an input list where each element represents a song, and is a 2-tuple of the format (artist, np.ndarray).
+    The first element in each tuple is an integer representing a unique artist, and the second element is a matrix
+    with a row for each word embedding in a given song
+
+    Args:
+        artist_dict: (dict[dict[str, np.ndarray]]): A dictionary mapping artist names to dictionaries of song names,
+          which map song names to a matrix of word embeddings
+        vocab (dict[str: np.ndarray]): A dictionary mapping words to their word embeddings
+        artist_indices (dict[str, int]): A dictionary mapping artist names to a unique integer
+    Returns
+        list((int, np.ndarray)): A list of tuples where the first element is an integer representing an artist, and
+          the second element is a matrix of word embeddings for a particular song by that artist
+    """
+
+    input_set = []
+    for artist in artist_dict:
+        for song in artist_dict[artist]:
+            lyric_embeddings = lyrics_to_word_matrix(artist_dict[artist][song], vocab)
+            input_set.append((artist_indices[artist], lyric_embeddings))
+
+    return input_set

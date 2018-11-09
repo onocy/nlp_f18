@@ -1,8 +1,8 @@
 import torch
 from torch import nn
-import numpy as np
 
-from computation import compute_song_vector
+from util.io_helper import load_word_embeddings, tokenize_csv
+from util.computation import *
 
 
 class ArtistNet(nn.Module):
@@ -21,7 +21,7 @@ class ArtistNet(nn.Module):
         self.out = nn.Linear(self.d_emb, self.num_classes)
         self.nonlin = nn.LogSoftmax()
 
-    # provide the forward propagation steps
+    # Fordward propagation
     def forward(self, inputs):
         batch_embs = self.word_embs(inputs)  # Dim = (16, 32, 20)
 
@@ -44,7 +44,7 @@ class ArtistNet(nn.Module):
 
         # Declare our loss functions and optimizers
         loss = loss_fn()
-        optimizer = opt_algo(net.parameters())
+        optimizer = opt_algo(self.parameters())
 
         # Loop over every epoch
         for ep in range(num_epochs):
@@ -56,7 +56,7 @@ class ArtistNet(nn.Module):
                 if len(batch) < batch_size:
                     break
 
-                in_mat = torch.zeros(batch_size, max_input_len, dtype=torch.long)
+                in_mat = torch.zeros(batch_size, self.d_emb, dtype=torch.long)
                 out_vec = torch.zeros(len(batch), dtype=torch.long)
 
                 for i, (artist, lyrics) in enumerate(batch):
@@ -80,13 +80,29 @@ class ArtistNet(nn.Module):
 
 
 if __name__ == '__main__':
-    # Build the network
-    vocab = lyrics_to_word_matrix()
-    net = ArtistNet(20, 2, len(vocab))
-    batch_size = 16
-    max_input_len = 32
-    idx_to_w = {v: k for k, v in vocab.items()}
+    import random
 
-    num_epochs = 5
+    # Load our word embeddings and artist dictionary
+    vocab = load_word_embeddings('../glove.6B.50d.txt')
+    artist_dict = tokenize_csv('../songdata.csv', 0, 1, 3)
+    artist_indices = create_artist_index(artist_dict)
 
-    net.train(net, num_epochs, max_input_len)
+    # Our input data
+    input_data = build_input_data(artist_dict, vocab, artist_indices)
+    print("Built input data.")
+
+    # Shuffle our input data and split it into 20% test, 80% training data
+    random.shuffle(input_data)
+    training_length = int(0.8 * len(input_data))
+
+    training_data = input_data[:training_length]
+    test_data = input_data[training_length:]
+
+    # Create our neural network
+    net = ArtistNet(50, artist_indices, vocab)
+    idx_to_artist = {v: k for k, v in artist_indices.items()}
+
+    print("About to train the network!")
+
+    # Training time!
+    net.train_network(training_data, batch_size=16, num_epochs=10)
