@@ -4,6 +4,25 @@
 import numpy as np
 
 
+def tokenize_string(s, regex=None):
+    """
+    Tokenizes a string into a list of words
+    Args:
+        s (str): The string to be tokenized
+    Optional:
+        regex (re.Pattern): A compiled regex pattern that specifies which characters in the string to remove
+    Returns:
+        list[str]: A list of tokenized words
+    """
+
+    import nltk # Remember to have the `punkt` package downloaded
+    import re
+
+    if regex:
+        s = re.sub(regex, '', s)
+    return nltk.word_tokenize(s)
+
+
 def tokenize_csv(f, artist_col, song_col, lyric_col):
     """
     Tokenizes a csv file containing (artist -> lyric) mappings
@@ -17,12 +36,8 @@ def tokenize_csv(f, artist_col, song_col, lyric_col):
           of words in each song
     """
 
-    import nltk
     import csv
     import re
-
-    # TODO: To save time, avoid performing this check if punkt is already downloaded.
-    nltk.download('punkt')
 
     artists = {}
     with open(f) as file:
@@ -34,7 +49,7 @@ def tokenize_csv(f, artist_col, song_col, lyric_col):
         for row in file_csv:
             artist = row[artist_col]
             song = row[song_col]
-            lyrics = nltk.word_tokenize(re.sub('\'|,|\(|\)|\?|\!', '', row[lyric_col].lower()))
+            lyrics = tokenize_string(row[lyric_col].lower(), regex=re.compile('\'|,|\(|\)|\?|\!'))
             if artist not in artists:
                 artists[artist] = {}
             artists[artist][song] = lyrics

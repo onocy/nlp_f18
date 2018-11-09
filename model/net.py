@@ -1,36 +1,59 @@
 import torch
 from torch import nn
 
-from util.io_helper import load_word_embeddings, tokenize_csv
+from util.io_helper import *
 from util.computation import *
+
+import random
 
 
 class ArtistNet(nn.Module):
-    # define the model parameters
-    def __init__(self, d_embedding, class_mapping, vocab):
+
+    def __init__(self, d_embedding, artist_classes, vocab):
+        """
+        Initializes our ArtistNet Neural Network
+        Params:
+            d_embedding (int): The number of dimensions in each of the word embedding vectors
+            artist_classes (dict[str, int]): A dictionary mapping artist names to a unique integer
+            vocab (dict[str, np.ndarray]): A dictionary mapping words to their word embeddings
+        """
         super(ArtistNet, self).__init__()
 
         self.d_emb = d_embedding
-        self.num_classes = len(class_mapping)
-        self.len_vocab = len(vocab)
+        self.artist_classes = artist_classes
+        self.idx_to_artist = {v : k for k, v in artist_classes.items()}
+        self.vocab = vocab
 
-        # Make our embedding matrix
-        self.word_embs = nn.Embedding(self.len_vocab, self.d_emb)
+        # Non-linear activation functions for hidden layers
+        self.sigmoid = nn.Sigmoid()
+        self.tanh = nn.Tanh()
 
-        # Make linear layer to project onto 2 classes (pos, neg)
-        self.out = nn.Linear(self.d_emb, self.num_classes)
-        self.nonlin = nn.LogSoftmax()
+        # Create hidden layers
+        self.h1 = nn.Linear(self.d_emb, self.d_emb)
+        self.h2 = nn.Linear(self.d_emb, self.d_emb)
+        self.h3 = nn.Linear(self.d_emb, self.d_emb)
 
-    # Fordward propagation
+        # Make linear layer to project onto all of our artist classes
+        self.out = nn.Linear(self.d_emb, len(artist_classes))
+        self.softmax = nn.LogSoftmax()
+
     def forward(self, inputs):
-        batch_embs = self.word_embs(inputs)  # Dim = (16, 32, 20)
+        """
+        Computes a probability distribution over the output classes
+        Args:
+            inputs (torch.Tensor): A tensor containing one or more input vectors of dimension `self.d_emb`
+        Returns:
+            torch.Tensor: One or more probability distributions over the output classes
+        """
 
-        # Average the word embeddings over each sentence
-        avgs = torch.mean(batch_embs, 1)
-        z = self.out(avgs)
-        return self.nonlin(z)
+        h1_out = self.sigmoid(self.h1(inputs))
+        h2_out = self.sigmoid(self.h2(h1_out))
+        h3_out = self.sigmoid(self.h3(h2_out))
 
-    def train_network(self, training_data, batch_size, num_epochs=10, loss_fn=torch.nn.NLLLoss,
+        z = self.out(h3_out)
+        return self.softmax(z)
+
+    def train_network(self, training_data, batch_size, learning_rate = 0.05, num_epochs=10, loss_fn=torch.nn.NLLLoss,
                       opt_algo=torch.optim.Adam):
         """
         Trains the neural network for the given number of epochs
@@ -38,18 +61,22 @@ class ArtistNet(nn.Module):
             training_data (list[(int, np.ndarray)]): A list of training tuples of the form (artist_idx, word_embeddings)
             batch_size (int): The number of training samples in each batch
         Optional:
+            learning_rate (float): The learning rate. Defaults to 0.05
             num_epochs (int): The number of epochs to train for. If not specified, defaults to 10
-            loss_fn (func): The loss function to train the network on
-            opt_algo (func): The optimizer algorithm to use
+            loss_fn (func): The loss function to train the network on. Defaults to torch.nn.NLLLoss
+            opt_algo (func): The optimizer algorithm to use. Defaults to torch.optim.Adam
         """
 
         # Declare our loss functions and optimizers
         loss = loss_fn()
-        optimizer = opt_algo(self.parameters())
+        optimizer = opt_algo(self.parameters(), lr=learning_rate)
 
         # Loop over every epoch
         for ep in range(num_epochs):
             ep_loss = 0.
+
+            # Shuffle the training data before selecting out batches
+            random.shuffle(training_data)
 
             # Loop over each batch
             for start in range(0, len(training_data), batch_size):
@@ -57,7 +84,7 @@ class ArtistNet(nn.Module):
                 if len(batch) < batch_size:
                     break
 
-                in_mat = torch.zeros(batch_size, self.d_emb, dtype=torch.long)
+                in_mat = torch.zeros(batch_size, self.d_emb)
                 out_vec = torch.zeros(len(batch), dtype=torch.long)
 
                 for i, (artist, lyrics) in enumerate(batch):
@@ -79,13 +106,33 @@ class ArtistNet(nn.Module):
             # Print out our loss at the end of every epoch
             print("Epoch #{}: {}".format(ep, ep_loss))
 
+    def predict(self, lyrics):
+        """
+        Predicts the artist that made the song containing the corresponding lyrics
+        Args:
+            lyrics (str): A string of words representing lyrics to a song
+        Returns:
+            str: The name of the artist who created the song
+        """
+        import re
+
+        word_list = tokenize_string(lyrics, regex=re.compile('\'|,|\(|\)|\?|\!'))
+        W = lyrics_to_word_matrix(word_list, self.vocab)
+        input_tensor = torch.tensor(torch.mean(torch.tensor(W), 0), dtype=torch.float)
+
+        # Get the artist with the highest probability
+        prediction = torch.argmax(self(input_tensor)).item()
+        return self.idx_to_artist[prediction]
+
 
 if __name__ == '__main__':
-    import random
 
     # Load our word embeddings and artist dictionary
     vocab = load_word_embeddings('../glove.6B.50d.txt')
-    artist_dict = tokenize_csv('../songdata.csv', 0, 1, 3)
+    # artist_dict = tokenize_csv('../songdata.csv', 0, 1, 3)
+    # pickle_object(artist_dict, 'artists.pickle')
+    artist_dict = unpickle_object('artists.pickle')
+
     artist_indices = create_artist_index(artist_dict)
 
     # Our input data
@@ -101,9 +148,9 @@ if __name__ == '__main__':
 
     # Create our neural network
     net = ArtistNet(50, artist_indices, vocab)
-    idx_to_artist = {v: k for k, v in artist_indices.items()}
 
     print("About to train the network!")
 
     # Training time!
     net.train_network(training_data, batch_size=16, num_epochs=10)
+    pickle_object(net, 'net.pickle')
