@@ -38,10 +38,16 @@ class Learner(object):
 
 if __name__ == '__main__':
     from plotter import plot_coords_with_labels
+    import sys
+    import os.path
 
-    learner = Learner('../songdata.csv')
-    artists = learner.learn_artists()
-    pickle_object(learner, 'learner.pickle')
+    if os.path.isfile('learner.pickle') and sys.argv[1] is None:
+        print('Reading from pickle file...')
+        learner = unpickle_object('learner.pickle')
+    else:
+        learner = Learner('../songdata.csv')
+        artists = learner.learn_artists()      
+        pickle_object(learner, 'learner.pickle')
 
     validate(artists, learner.artist_dict, learner.vocab)
 
