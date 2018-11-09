@@ -35,7 +35,8 @@ class ArtistNet(nn.Module):
         """
         Trains the neural network for the given number of epochs
         Args:
-            net (ArtistNet): An artist-lyric classification neural network
+            training_data (list[(int, np.ndarray)]): A list of training tuples of the form (artist_idx, word_embeddings)
+            batch_size (int): The number of training samples in each batch
         Optional:
             num_epochs (int): The number of epochs to train for. If not specified, defaults to 10
             loss_fn (func): The loss function to train the network on

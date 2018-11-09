@@ -82,6 +82,7 @@ def pickle_object(obj, filename):
     outfile = open(filename, 'wb')
     pickle.dump(obj, outfile)
 
+
 def unpickle_object(filename):
     """
     Unpickles a file into an object with the given filename
