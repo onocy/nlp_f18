@@ -11,10 +11,9 @@ with open('../songdata.csv') as file:
     i = 0
     for row in file_csv:
         artist = row[0]
-        lyrics = nltk.word_tokenize(re.sub('\'|,|\(|\)|\?|\!', '', row[3].lower()))
+        lyrics = nltk.word_tokenize(re.sub('\'|,|\(|\)|\?|\!|\.|\[|\]|`|:|...', '', row[3].lower()))
         if artist not in artist_lyrics:
             artist_lyrics[artist] = []
         artist_lyrics[artist] += lyrics
 
-print(type(artist_lyrics['ABBA']))
 print(artist_lyrics['ABBA'])

@@ -34,7 +34,7 @@ def tokenize_csv(f, artist_col, song_col, lyric_col):
         for row in file_csv:
             artist = row[artist_col]
             song = row[song_col]
-            lyrics = nltk.word_tokenize(re.sub('\'|,|\(|\)|\?|\!', '', row[lyric_col].lower()))
+            lyrics = nltk.word_tokenize(re.sub('\'|,|\(|\)|\?|\!|\.|\[|\]|`|:|...', '', row[lyric_col].lower()))
             if artist not in artists:
                 artists[artist] = {}
             artists[artist][song] = lyrics
@@ -74,10 +74,21 @@ def pickle_object(obj, filename):
     Pickles a given object into a file with the given file name
     Args:
         obj (object): A python object
-        filename (str): The name of the file to write the object to
+        filename (str): The name of the file to write the object 
     """
 
     import pickle
 
     outfile = open(filename, 'wb')
     pickle.dump(obj, outfile)
+
+def unpickle_object(filename):
+    """
+    Unpickles a file into an object with the given filename
+    Args: 
+        filename (str): The name of the file read that is loaded back into an object.
+    """
+    import pickle 
+
+    infile = open(filename, 'rb')
+    return pickle.load(infile)
