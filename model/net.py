@@ -140,6 +140,24 @@ class ArtistNet(nn.Module):
         prediction = torch.argmax(self(input_tensor)).item()
         return self.idx_to_artist[prediction]
 
+    def test(self, test_data):
+        """
+        Tests the network on the given test data
+        Args:
+            test_data (list[(int, np.ndarray)]): A list of test tuples of the form (artist_idx, word_embeddings)
+        """
+        num_correct = 0
+        for artist, lyrics in test_data:
+            input_vector = torch.zeros(self.d_emb)
+            for i in range(min(len(lyrics), self.d_emb)):
+                input_vector[i] = lyrics[i]
+            prediction = torch.argmax(self(input_vector)).item()
+            if prediction == artist:
+                num_correct += 1
+
+        print("Test accuracy: {:.2f}%".format(num_correct / len(test_data) * 100))
+
+
 
 if __name__ == '__main__':
 
