@@ -2,6 +2,7 @@
 """
 
 import numpy as np
+import torch
 
 
 def compute_pca(A, num_dimensions):
@@ -59,26 +60,18 @@ def compute_artist_vector(S, reduce_to=None, f=lambda v: np.mean(v, axis=0)):
     return f(S)
 
 
-def lyrics_to_word_matrix(lyrics, vocab):
+def lyrics_to_vocab_idx(lyrics, vocab_index):
     """
-    Converts a string of song lyrics to a matrix whose rows are word embedding vectors
+    Converts a string of song lyrics to a matrix whose rows are word vocab indices
     Args:
         lyrics (list[str]): A list of strings representing a song
-        vocab (dict[str: np.ndarray]): A dictionary mapping words to their embedding vectors
+        vocab_index (dict[str: np.ndarray]): A dictionary mapping words to their unique indices
     Returns:
-        np.ndarray: A (len(lyrics) x embedding_size) matrix with a word embedding row for each word in the lyric string
+        torch.tensor: A (len(lyrics)) tensor with an index entry for each word in the string
     """
 
-    # We need some way to determine the size of each of the word embeddings. Here we are assuming the vocabulary
-    # has an embedding for the word 'a', which seems like a reasonable assumption given the scope of this project
-    M = np.zeros((len(lyrics), len(vocab['a'])))
-
-    for i, word in enumerate(lyrics):
-        embedding = vocab.get(word)
-        if embedding is not None:
-            M[i] = embedding
-
-    return M
+    input_vector = [vocab_index.get(word, -1) for word in lyrics]
+    return torch.tensor(input_vector, dtype=torch.long)
 
 
 def project_onto_subspace(v, B):
@@ -147,14 +140,15 @@ def build_input_data(artist_dict, vocab_index, artist_indices):
         vocab_index (dict[str: np.ndarray]): A dictionary mapping words to their unique word indices
         artist_indices (dict[str, int]): A dictionary mapping artist names to a unique integer
     Returns
-        list((int, np.ndarray)): A list of tuples where the first element is an integer representing an artist, and
+        list((int, torch.tensor)): A list of tuples where the first element is an integer representing an artist, and
           the second element is a matrix of word embeddings for a particular song by that artist
     """
 
     input_set = []
     for artist in artist_dict:
         for song in artist_dict[artist]:
-            lyric_indices = [vocab_index.get(word, -1) for word in artist_dict[artist][song]]
+            lyric_indices = lyrics_to_vocab_idx(artist_dict[artist][song], vocab_index)
             input_set.append((artist_indices[artist], lyric_indices))
 
     return input_set
+
