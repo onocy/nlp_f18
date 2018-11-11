@@ -152,3 +152,28 @@ def build_input_data(artist_dict, vocab_index, artist_indices):
 
     return input_set
 
+
+def build_genre_input_data(genre_dict, vocab_index, genre_indices):
+    """
+    Creates an input list where each element represents a song, and is a 2-tuple of the format (genre, np.ndarray).
+    The first element in each tuple is an integer representing a unique genre, and the second element is a matrix
+    with a row for each word embedding in a given song
+
+    Args:
+        genre_dict: (dict[str, dict[str, dict[str, torch.tensor]]]): A dictionary mapping music genres to dictionaries
+          mapping artist names to dictionaries mapping song names to lists of word indices
+        vocab_index (dict[str: np.ndarray]): A dictionary mapping words to their unique word indices
+        genre_indices (dict[str, int]): A dictionary mapping genre names to a unique integer
+    Returns
+        list((int, torch.tensor)): A list of tuples where the first element is an integer representing a genre, and
+          the second element is a matrix of word embeddings for a particular song in that genre
+    """
+
+    input_set = []
+    for genre in genre_dict:
+        for artist in genre_dict[genre]:
+            for song in genre_dict[genre][artist]:
+                lyric_indices = lyrics_to_vocab_idx(genre_dict[genre][artist][song], vocab_index)
+                input_set.append((genre_indices[genre], lyric_indices))
+
+    return input_set
