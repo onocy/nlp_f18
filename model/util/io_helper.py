@@ -56,6 +56,32 @@ def tokenize_csv(f, artist_col, song_col, lyric_col):
 
     return artists
 
+def tokenize_csv_pandas(f):
+    import pandas as pd
+    import nltk
+    nltk.download('punkt')
+    p = pd.read_csv("../lyrics.csv")
+    d = {}
+    for _, val in p.iterrows():
+        artist = val["artist"]
+        if artist in d:
+            d[artist].append(tokenize(clean(val["lyrics"])))
+        else:
+            d[artist] = [tokenize(clean(val["lyrics"]))]
+
+def tokenize(s):
+    import nltk
+    import re
+    return nltk.word_tokenize(re.sub('[^\w\s]+', '', s))
+
+
+def clean(s):
+    s = str(s)
+    s = s.lower()
+    s = s.replace('\n',' ')
+    s = s.replace(',',' ')
+    return s
+
 
 def load_word_embeddings(f, unzip=False):
     """
