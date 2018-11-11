@@ -10,7 +10,7 @@ import random
 
 class ArtistLSTM(nn.Module):
 
-    def __init__(self, embedding_dim, hidden_dim, output_size, vocab_size):
+    def __init__(self, embedding_dim, hidden_dim, output_size, vocab_size, max_input_len):
         """
         Initializes our ArtistNet LSTM network
         Params:
@@ -21,6 +21,7 @@ class ArtistLSTM(nn.Module):
         super(ArtistLSTM, self).__init__()
 
         self.embedding_dim = embedding_dim
+        self.max_input_length = max_input_len
 
         # Setup the dimensions of our hidden states and LSTM model
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
@@ -60,7 +61,7 @@ class ArtistLSTM(nn.Module):
         artist_mat = self.out(lstm_out.view(len(lyrics), -1))
         return F.log_softmax(artist_mat, dim=1)
 
-    def __input_to_vector(self, s):
+    def __input_to_vector(self, s, vocab):
         """
         Converts an input string of lyrics s into an input vector to the neural network
         Args:
@@ -70,12 +71,12 @@ class ArtistLSTM(nn.Module):
         """
         import re
 
-        input_tensor = torch.zeros(self.embedding_dim, dtype=torch.float)
+        input_tensor = torch.zeros(1, self.max_input_length, dtype=torch.long)
         word_list = tokenize_string(s, regex=re.compile('\'|,|\(|\)|\?|\!'))
 
-        for i, word in enumerate(word_list[:self.d_emb]):
+        for i, word in enumerate(word_list[:self.max_input_length]):
             # If the given word does not exist in the vocabulary index, just map it to -1
-            input_tensor[i] = self.vocab.get(word, -1)
+            input_tensor[0][i] = vocab.get(word, -1)
 
         return input_tensor
 
@@ -87,13 +88,11 @@ class ArtistLSTM(nn.Module):
             training_data (list[(int, np.ndarray)]): A list of training tuples of the form (artist_idx, word_embeddings)
             batch_size (int): The number of training samples in each batch
         Optional:
-            learning_rate (float): The learning rate. Defaults to 0.05
+            learning_rate (float): The learning rate. Defaults to 0.001
             num_epochs (int): The number of epochs to train for. If not specified, defaults to 10
             loss_fn (func): The loss function to train the network on. Defaults to torch.nn.NLLLoss
             opt_algo (func): The optimizer algorithm to use. Defaults to torch.optim.Adam
         """
-
-        MAX_INPUT_LENGTH = 50
 
         # Declare our loss functions and optimizers
         loss = loss_fn()
@@ -115,12 +114,12 @@ class ArtistLSTM(nn.Module):
                 if len(batch) < batch_size:
                     break
 
-                in_mat = torch.zeros(batch_size, MAX_INPUT_LENGTH, dtype=torch.long)
+                in_mat = torch.zeros(batch_size, self.max_input_length, dtype=torch.long)
                 out_vec = torch.zeros(len(batch), dtype=torch.long)
 
                 for i, (artist, lyrics) in enumerate(batch):
                     out_vec[i] = artist
-                    for j, lyric in enumerate(lyrics[:MAX_INPUT_LENGTH]):
+                    for j, lyric in enumerate(lyrics[:self.max_input_length]):
                         in_mat[i, j] = lyric
 
                 preds = self(in_mat)
@@ -136,7 +135,7 @@ class ArtistLSTM(nn.Module):
             # Print out our loss at the end of every epoch
             print("Epoch #{}: {}".format(ep, ep_loss))
 
-    def predict(self, lyrics):
+    def predict(self, lyrics, vocab):
         """
         Predicts the artist that made the song containing the corresponding lyrics (using vocabulary indices)
         Args:
@@ -144,11 +143,10 @@ class ArtistLSTM(nn.Module):
         Returns:
             str: The name of the artist who created the song
         """
-        input_tensor = self.__input_to_vector(lyrics)
+        input_tensor = self.__input_to_vector(lyrics, vocab)
 
         # Get the artist with the highest probability
-        prediction = torch.argmax(self(input_tensor)).item()
-        return self.idx_to_artist[prediction]
+        return torch.argmax(self(input_tensor)).item()
 
     def test_batch(self, test_data):
         corr = 0.
@@ -156,12 +154,12 @@ class ArtistLSTM(nn.Module):
 
         for start in range(0, len(test_data), 32):
             batch = test_data[start:start+1]
-            in_mat = torch.zeros(len(batch), 50, dtype=torch.long)
+            in_mat = torch.zeros(len(batch), self.max_input_length, dtype=torch.long)
             truths = torch.zeros(len(batch), dtype=torch.long)
 
             for i, (artist, lyrics) in enumerate(batch):
                 truths[i] = artist
-                for j, lyric in enumerate(lyrics[:50]):
+                for j, lyric in enumerate(lyrics[:self.max_input_length]):
                     in_mat[i, j] = lyric
 
             preds = net(in_mat)
@@ -180,8 +178,9 @@ class ArtistLSTM(nn.Module):
         """
         num_correct = 0
         for artist, lyrics in test_data:
-            input_vec = torch.zeros(1, self.embedding_dim, dtype=torch.long)
-            input_vec[0] = lyrics[:self.embedding_dim]
+            input_vec = torch.zeros(1, self.max_input_length, dtype=torch.long)
+            for i in range(min(self.max_input_length, len(lyrics))):
+                input_vec[0][i] = lyrics[i]
             prediction = torch.argmax(self(input_vec)).item()
             if prediction == artist:
                 num_correct += 1
@@ -201,6 +200,10 @@ if __name__ == '__main__':
     artist_dict = unpickle_object('artists.pickle')
     vocab_index = create_vocab_index(artist_dict)
 
+    # Filter our artist dictionary down to just 5 artists
+    artist_dict = {artist: artist_dict[artist] for artist in random.sample(artist_dict.keys(), 5)}
+    print("Chosen artists: ", artist_dict.keys())
+
     artist_indices = create_artist_index(artist_dict)
 
     # Our input data
@@ -215,11 +218,11 @@ if __name__ == '__main__':
     test_data = input_data[training_length:]
 
     # Create our neural network with 50-count word embeddings
-    net = ArtistLSTM(100, 10, len(artist_dict), len(vocab_index))
+    net = ArtistLSTM(100, 10, len(artist_dict), len(vocab_index), max_input_len=300)
     # net = unpickle_object('net.pickle')
     print("About to train the network!")
-    # net.test(test_data)
 
     # Training time!
-    net.train_network(training_data, batch_size=64, num_epochs=5)
+    net.train_network(training_data, batch_size=64, num_epochs=20, learning_rate=0.09)
+    net.test(test_data)
     pickle_object(net, 'net.pickle')
