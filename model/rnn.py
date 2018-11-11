@@ -192,6 +192,13 @@ class ArtistLSTM(nn.Module):
 
 
 if __name__ == '__main__':
+    import os
+    if os.path.isfile('learner.pickle') and sys.argv[1] is None:
+        print('Reading from pickle file...')
+        learner = unpickle_object('genre.pickle')
+    else:
+        genre_dict = tokenize_csv_pandas('../lyrics.csv')
+        pickle_object(genre_dict, 'genre.pickle')
 
     # Load our word embeddings and artist dictionary
     # vocab = load_word_embeddings('../glove.6B.50d.txt')

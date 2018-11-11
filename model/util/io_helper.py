@@ -2,6 +2,10 @@
 """
 
 import numpy as np
+import nltk
+import re
+import pandas as pd
+
 
 
 def tokenize_string(s, regex=None):
@@ -15,7 +19,6 @@ def tokenize_string(s, regex=None):
         list[str]: A list of tokenized words
     """
 
-    import nltk # Remember to have the `punkt` package downloaded
     import re
 
     if regex:
@@ -57,21 +60,22 @@ def tokenize_csv(f, artist_col, song_col, lyric_col):
     return artists
 
 def tokenize_csv_pandas(f):
-    import pandas as pd
-    import nltk
     nltk.download('punkt')
     p = pd.read_csv("../lyrics.csv")
     d = {}
     for _, val in p.iterrows():
+        genre = val["genre"]
         artist = val["artist"]
-        if artist in d:
-            d[artist].append(tokenize(clean(val["lyrics"])))
-        else:
-            d[artist] = [tokenize(clean(val["lyrics"]))]
+        song = val["song"]
+
+        if genre not in d: 
+            d[genre] = {}
+        if artist not in d[genre]: 
+            d[genre][artist] = {}
+        
+        d[genre][artist][song] = tokenize(clean(val["lyrics"]))
 
 def tokenize(s):
-    import nltk
-    import re
     return nltk.word_tokenize(re.sub('[^\w\s]+', '', s))
 
 
