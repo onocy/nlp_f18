@@ -7,7 +7,6 @@ import re
 import pandas as pd
 
 
-
 def tokenize_string(s, regex=None):
     """
     Tokenizes a string into a list of words
@@ -59,32 +58,42 @@ def tokenize_csv(f, artist_col, song_col, lyric_col):
 
     return artists
 
+
 def tokenize_csv_pandas(f):
-    nltk.download('punkt')
-    p = pd.read_csv("../lyrics.csv")
+    """
+    Tokenizes and imports a genre-artist-song CSV into a python dictionary
+    Args:
+        f (str): The path to a CSV dataset
+    Returns:
+        dict[str, dict[str, dict[str, list[str]]]: A dictionary mapping genres to artists to songs to a list of lyrics
+    """
+    p = pd.read_csv(f)
     d = {}
     for _, val in p.iterrows():
         genre = val["genre"]
         artist = val["artist"]
         song = val["song"]
+        lyrics = clean_lyrics(val["lyrics"])
 
         if genre not in d: 
             d[genre] = {}
         if artist not in d[genre]: 
             d[genre][artist] = {}
         
-        d[genre][artist][song] = tokenize(clean(val["lyrics"]))
+        d[genre][artist][song] = tokenize_string(lyrics, regex=re.compile('[^\w\s]+'))
 
-def tokenize(s):
-    return nltk.word_tokenize(re.sub('[^\w\s]+', '', s))
+    return d
 
 
-def clean(s):
-    s = str(s)
-    s = s.lower()
-    s = s.replace('\n',' ')
-    s = s.replace(',',' ')
-    return s
+def clean_lyrics(s):
+    """
+    Cleans a lyrics string `s` by converting all newlines and commas to spaces
+    Args:
+        s (str): A string of lyrics
+    Returns:
+        str: A cleaned string with newlines and commas replaced by spaces
+    """
+    return re.sub('\n|,', ' ', s)
 
 
 def load_word_embeddings(f, unzip=False):
