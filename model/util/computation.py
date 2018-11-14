@@ -92,6 +92,20 @@ def project_onto_subspace(v, B):
     return sum(project(v, b_i) for b_i in B)[:len(B)]
 
 
+def create_genre_index(genre_dict):
+    """
+    Creates a dictionary mapping genres to a unique integer index
+    Args:
+        genre_dict (dict[dict[str np.ndarray]]): A dictionary mapping genre names to dictionaries of artist names, to
+          dictionaries of
+    Returns:
+        dict[str, int]: A dictionary mapping genre titles to a unique integer
+    """
+
+    sorted_genres = sorted(genre_dict.keys())
+    return {genre : i for i, genre in enumerate(sorted_genres)}
+
+
 def create_artist_index(artist_dict):
     """
     Creates a dictionary mapping artist names to a unique integer index
@@ -118,6 +132,29 @@ def create_vocab_index(artist_dict):
 
     vocab_index = {'<PAD>': 0}
     wordset = {word for artist in artist_dict for song in artist_dict[artist] for word in artist_dict[artist][song]}
+
+    # Sort our distinct set of words so the function produces a deterministic ordering
+    distinct_sorted = sorted(list(wordset))
+
+    for i, word in enumerate(distinct_sorted):
+        vocab_index[word] = i + 1
+
+    return vocab_index
+
+
+def create_vocab_index_from_genre(genre_dict):
+    """
+    Creates a vocabulary mapping each word to a unique integer
+    Args:
+        genre_dict (dict[dict[str, list[str]]]): A dictionary mapping genres to dictionaries mapping artist names to
+          dictionaries mapping song names to a list of strings corresponding to lyrics to a particular
+    Returns:
+        dict[str, int]: A dictionary mapping every distinct word that appears in artist_dict to a unique integer
+    """
+
+    vocab_index = {'<PAD>': 0}
+    wordset = {word for genre in genre_dict for artist in genre_dict[genre] for song in genre_dict[genre][artist]
+                for word in genre_dict[genre][artist][song] }
 
     # Sort our distinct set of words so the function produces a deterministic ordering
     distinct_sorted = sorted(list(wordset))
@@ -169,11 +206,15 @@ def build_genre_input_data(genre_dict, vocab_index, genre_indices):
           the second element is a matrix of word embeddings for a particular song in that genre
     """
 
+    songs_per_genre = {genre : 0 for genre in genre_dict.keys()}
+
     input_set = []
     for genre in genre_dict:
         for artist in genre_dict[genre]:
             for song in genre_dict[genre][artist]:
-                lyric_indices = lyrics_to_vocab_idx(genre_dict[genre][artist][song], vocab_index)
-                input_set.append((genre_indices[genre], lyric_indices))
+                if songs_per_genre[genre] < 20000:
+                    lyric_indices = lyrics_to_vocab_idx(genre_dict[genre][artist][song], vocab_index)
+                    input_set.append((genre_indices[genre], lyric_indices))
+                    songs_per_genre[genre] += 1
 
     return input_set
