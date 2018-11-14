@@ -212,7 +212,7 @@ def build_genre_input_data(genre_dict, vocab_index, genre_indices):
     for genre in genre_dict:
         for artist in genre_dict[genre]:
             for song in genre_dict[genre][artist]:
-                if songs_per_genre[genre] < 20000:
+                if songs_per_genre[genre] < 2000:
                     lyric_indices = lyrics_to_vocab_idx(genre_dict[genre][artist][song], vocab_index)
                     input_set.append((genre_indices[genre], lyric_indices))
                     songs_per_genre[genre] += 1

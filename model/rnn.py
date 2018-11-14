@@ -180,15 +180,6 @@ class ArtistLSTM(nn.Module):
         print("Test accuracy: {:.2f}%".format(num_correct / len(test_data) * 100))
 
 
-def run_artist_net(train=True):
-    """
-    Runs our LSTM RNN on the artist dataset
-    Optional:
-        train (bool): If True, re-trains the network. If False, only the tests are run. An exception will be raised
-          if there is no pickled network object in the current directory
-    """
-
-
 def run_genre_net(train=True):
     """
     Runs our LSTM RNN on the genre dataset
@@ -204,6 +195,10 @@ def run_genre_net(train=True):
     else:
         genre_dict = tokenize_csv_pandas('../lyrics.csv')
         print("Tokenized the genre dictionary from the csv file.")
+
+    # Remove "Other" and "Not Available" genres from the dictionary
+    del genre_dict['Other']
+    del genre_dict['Not Available']
 
     vocab_index = create_vocab_index_from_genre(genre_dict)
     genre_indices = create_genre_index(genre_dict)
@@ -290,5 +285,5 @@ def run_artist_net(train=True):
 if __name__ == '__main__':
     import os.path
 
-    run_artist_net()
-    # run_genre_net()
+    # run_artist_net()
+    run_genre_net(train=False)
