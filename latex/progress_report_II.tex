@@ -3,8 +3,8 @@
     \usepackage[hyperref]{naaclhlt2019}
     \usepackage{times}
     \usepackage{latexsym}
-    \usepackage{graphicx}
-    
+    \usepackage{graphicx} 
+     \usepackage{booktabs}
     \usepackage{url}
     
     \aclfinalcopy 
@@ -27,27 +27,177 @@
     \maketitle
     
     \section{Problem statement}
-    Now that you've had some time to work on the project, please clearly and concisely summarize the goal of your project and its motivations in 1-2 paragraphs. If your project has changed since you submitted your proposal, please explain what prompted the change.
+    Music is an important part of our everyday lives. Technological advances in modern society have made it easier than ever for new artists to distribute their songs over the Internet. Unfortunately, the massive volume of songs that are regularly released into the public can make it difficult to discern which song is made by which artist. Moreover, a more important question arises: Are the most popular artists the ones with the most distinct music?
+
+Aside from sound, the words an artist uses in a song are perhaps the most important determining factor in how it will appeal to the public. Lyrics contain semantic relevance, which allows for the possibility of implicit analysis of a song’s cultural relevance. Some of the greatest artists of all time are renown for their unique use of lyricism. Our project will aim to determine if:
+\begin{center}
+\small{
+(a) Given a set of lyrics, who the artist is with a high-degree of certainty.
+\\
+(b) Given our trained prediction model, what the lyrical uniqueness rank for various artists is.
+}
+\end{center}
+
     
-    Some general guidelines for the progress report: 4-6 pages, due Nov. 16. The report must contain at least one table or graph that conveys numerical information – for example, statistics about your data or annotations, accuracy or other results of running an algorithm on the data, or something else. We highly recommend using this LaTeX template to write your report. Note that some sections may not be relevant for your project; feel free to delete them and add other sections if you wish! If you're unsure whether to include something or not, please see me in office hours / after class or post on Piazza / the anonymous form.
-    
-    \section{Your dataset}
-    The most important rule of NLP: look at your data! Provide us with examples from your dataset. Explain what properties of the data make your task challenging. Report the source of the dataset, its basic statistics (e.g., size, number of words/sentences/documents) and some other statistics that are specifically relevant to your task. 
-    
-    \section{Annotation}
-    If your project involves annotation, you may have started a pilot annotation experiment, annotating a few dozen or few hundred examples. What major issues have come up? Do you and your project partners agree or disagree on examples? (At this stage, qualitative findings about these questions are fine.)
+    \section{Our Dataset}
+For the implementation of our described methodology, we chose to initially use a Kaggle sourced CSV file for our dataset \newcite{website:Mousehead}. This dataset contains a repository of 57,650 songs of a multitude of artists and genres. The distribution of artists and songs can be seen in Figure \ref{fig:songs_per_artist_I}, which uses a Pareto Distribution to visualize how close to 80\%  of the content within this dataset is described by only around 20\% of the artists. 
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figs/songs_per_artist_I.png}
+    \caption{Songs per Artist: \newcite{website:Mousehead}}
+    \label{fig:songs_per_artist_I}
+\end{figure}
+
+
+The column values of the dataset are 
+\begin{center}
+\textit{artist, song, link, text}
+\end{center}
+In this schema, the column \textit{text} contains the important lyrical information pertaining to the current song and artist. 
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figs/artists.png}
+    \caption{Most Captured Artists: \newcite{website:Mousehead}}
+    \label{fig:artists}
+\end{figure}
+
+\begin{table}[]
+\centering
+\begin{tabular}{lllll}
+\multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\textit{Average}} & \textit{Std. Dev} &  &  \\ \cline{1-3}
+\multicolumn{1}{l|}{Songs Per Artist} & \multicolumn{1}{c|}{94} & \multicolumn{1}{c}{49} &  &  \\ \cline{1-3}
+\multicolumn{1}{l|}{Word Count [Fig:\ref{fig:words_per_song}]} & \multicolumn{1}{c|}{219.48} & \multicolumn{1}{c}{108.81} &  &  \\
+ &  &  &  & 
+\end{tabular}
+\end{table}
+
+For our future implementations, we plan on using \newcite{website:Kaggle} with 362,237 songs for both its expanded amount of lyrical content.
+The column values of this dataset are :
+\begin{center}
+\textit{index, song, year, artist, genre, lyrics}
+\end{center}
+This allows us to utilize the additional song information for enahnced modeling (i.e Genre, Year).
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figs/words_per_song.png}
+    \caption{}
+    \label{fig:words_per_song}
+\end{figure}
     
     \section{Baselines}
-    Run some sort of NLP algorithm — classifier, parser, etc. — on the data, and report its result. Additionally, explain how it works, and what hyperparameters you are using! If you are using a ready-made dataset, you should define a train/test split, and you should have at least one accuracy number to report at this point.
+For our baseline approach, we used a simple averaging model. We first created a word matrix W. Each row in the matrix W contains the GloVe embedding \newcite{pennington2014glove} for a corresponding word in a song. 
+A song vector is then computed by calculating the mean of each value in the row of matrix W. 
+This vector thus acts as a unique representation for a particular song. 
+For a particular artist, a songs matrix S is created. Each row in the matrix S contains all of the different song vectors for that artist. 
+We then averaged the values of each row in matrix S to compute the final artist vector. 
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figs/naive_model.png}
+    \caption{Initial Approach}
+    \label{fig:naive}
+\end{figure}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figs/artist_dist.png}
+    \caption{Artist Embeddings Mapped to 2-Dimensions}
+    \label{fig:artist}
+\end{figure}
+
+
+After completing these steps for every artist in the dataset, each artist is represented as a single vector embedding [\ref{fig:naive}].
+
+
+We created a 80/20 train and test split. We tested the model accuracy by taking a lyric from the test set and creating the artist vector embedding with the steps outlined previously. The k closest vectors measured by cosine similarity to the newly generated artist vector is extracted from the learned embeddings. If the correct artist is contained in the top k vectors, we considered it a correct prediction by the model. We chose k to be 10 since it is a fairly low percent of the 643 total artists in the dataset. The model performed at an accuracy of 21.31\%. 
+
+Using the learned artist embeddings, we also plotted a small subset of artists on a 2D graph [\ref{fig:artist}].
+
+
     
     \section{Error analysis}
-    What kinds of inputs does your baseline fail at? Are there any semantic or syntactic commonalities between the examples it fails on? You may want to do a manual error analysis (e.g., annotate around 50 failed examples for various properties). How does (or will) your proposed approach fix these issues?
+
+
+We hypothesize a few reasons to why the baseline model performs so poorly. One is due to there being the same mapping function between the generation of song vectors and the artist vector. Simply averaging rows of matrices loses the meaning between the artists and songs. Our original dataset is also not robust enough. It contains 643 unique artists and 55,000 songs. 
+The artist with the most songs in the dataset has only about 200 songs in the data. For our final report, we would like to find a bigger dataset with more songs per artist. In addition, we could also find a another dataset and combine it with the dataset we are already using. After annotating failed examples, one thing we noticed was the dataset we used contains song structure labels such as \textit{"chorus"} or \textit{"verse 1"}.
+
+i.e:
+
+
+\begin{center}
+[ repeat chorus ] 
+only wait so long before your flower petals are all 
+gone baby i was trying to burn bridges of stone 
+. [ repeat chorus ]
+\end{center}
+
+
+
+
+
+
+
+We also noticed that all songs share the most common words in the English language as demonstrated by Zipf’s law. In the future, we should remove the song labels and also the most common English words from the dataset as they do not distinguish between different songs. 
+
+Regarding the issue of the naive mapping function between matrices, we planned to use Neural Networks to obtain a better performing model. The following section outlines our procedure for the Neural Networks implementation.
     
-    \section{Your approach}
-    What have you accomplished regarding your proposed approach? How does it work? Is your implementation already complete or in progress? What libraries are you currently using? What kind of computers are you running your experiments on? Are there any issues that you're stuck on? Be specific!!!
-    
+    \section{Our approach}
+
+\begin{center}
+ \href{https://github.com/onocy/nlp_f18/tree/rnn_pandas}{Repository}
+\end{center}
+
+\subsection{Introduction}
+  Our main approach consisted of building a deep learning model to classify which artist created a song given a string of lyrics. We used the Pytorch package  \newcite{paszke2017automatic} and iterated over several implementations of different neural networks. 
+
+\subsection{Vanilla Neural Network}
+
+The first non-trivial implementation we attempted was a simple network with an input layer, three hidden layers of the same dimension and a softmax output layer. To construct the input, we tokenized a string of lyrics into a list of strings, where each string contains exactly one word.
+
+
+ Each word in the input list was mapping to its respective word embedding in the \textit{glove.6B.50d.txt} file obtained from Homework 2. The output layer produced a probability distribution over all 643 artist in our original dataset. Before we could start training, we needed a reasonable method of standardizing the input to the network.
+
+\subsection{Input}
+
+We decided to create our input to the network by mapping each word in a song to its respective embedding vector and fixing the number of input words from each song to a constant value. If we made this cutoff too short (say, a maximum of 30 words per song input) it could result in the loss of potentially useful information contained in the rest of the song. If the cutoff value was too large, then much of the training data would be padded with zeros, thus taking up unnecessary memory and adding meaningless values to our inputs.
+
+We approached this situation like any good scientist should, and took a closer look at a histogram of words per song in our dataset [\ref{fig:words_per_song}]. The distribution was right-skewed with the mean around 220 words. After training and testing the network using several different cutoff values, a input length of 300 words seemed to produce the highest test accuracy.
+
+
+\subsection{Training and Testing} 
+
+Similar to our Baseline model, we used a 80/20 train/test split on the vanilla neural network model. Each training example is a 2-tuple containing a unique integer representing an artist and a fixed-length array of word embeddings corresponding to the lyrics in a song. We standardized the training session to run over 20 epochs, as it seemed like our optimization algorithm had diminishing returns when run for any longer. After each training session, we tested the network on our test data by comparing the element in the output vector with the highest probability to the ground truth value of the artist who created the song.
+
+While training, we adjusted the batch sizes to various powers of 2 (16, 32, 64, 128, and 256) and determined that with other hyperparameters fixed, a batch size of 64 yielded best test accuracy. We experimented using the Adam and SGD optimizers, both of which yielded very similar test results, even when used with different learning rates (ranging from 0.001 to 0.5). 
+
+We tested our network numerous times after training it with different combinations of hyperparameters. The accuracy was appalling each and every time. The maximum value we achieved was a test result of 0.38\% accuracy. After some investigation, we discovered a few reasons for this:
+
+1. We had 643 different output classes, but less than 20 training examples for many artists. The asymmetry of songs per artist potentially biased the network into learning stronger weights for some artists than others
+
+2. Our test method was comparing the output class with the highest probability to the true value of the artist. Given the amount of data we had per class, it would have been more reasonable to check if the ground truth artist was contained in the top k output classes (5 or 10) with highest probability
+\\ 
+
+Our poor results in this network led us to try other deep learning implementation that better lend themselves to NLP tasks. Needless to say, vanilla neural network are far from ideal when it comes to tasks involving sequential input.
+
+\subsection{Timing}   
+
+Given that our Neural Network was trained on a Macbook Pro (2.2 GHz Intel Core i7), our training time took 40 minutes per epoch, with 20 total epochs. In total, this was 13.3 hours for training. In order to speed up this process, we plan leveraging the enhanced processing power of GPUs. Specifically, the processing power of a NVIDIA GeForce GTX 1080. 
+
+\subsection{LSTM}   
+
+The second implementation we tried was an LSTM (Long-Short Term Memory) recurrent neural network. According to the literature, these type of networks are much better at extracting information from sequential input and time-series data.
+
+
     \section{Timeline for the rest of the project}
-    You now have a better idea of how much you can accomplish in the rest of the semester. Lay out the major items you want to accomplish. Provide a timeline to finish them by.
+
+\begin{enumerate}
+    \item Parameter Tuning (0.5 weeks) - November 19
+    \item Visualization Refinement \& Network Tuning (2 weeks) - December 3
+    \item Final report and Presentation Preparation (2 weeks) - Presentation Day
+\end{enumerate}
+
     
     
     \bibliographystyle{apalike}
