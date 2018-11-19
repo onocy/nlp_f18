@@ -7,6 +7,9 @@ from util.computation import *
 
 import random
 
+# Run the network on a GPU if one is available, else default to cpu
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 
 class ArtistLSTM(nn.Module):
 
@@ -26,13 +29,13 @@ class ArtistLSTM(nn.Module):
         self.max_input_length = max_input_len
 
         # Setup the dimensions of our hidden states and LSTM model
-        self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
+        self.word_embeddings = nn.Embedding(vocab_size, embedding_dim).to(device)
 
         self.hidden_dim = hidden_dim
-        self.lstm = nn.LSTM(embedding_dim, hidden_dim)
+        self.lstm = nn.LSTM(embedding_dim, hidden_dim).to(device)
 
         # Initialize our output linear layer
-        self.out = nn.Linear(hidden_dim, output_size)
+        self.out = nn.Linear(hidden_dim, output_size).to(device)
         self.hidden = self.__init_hidden()
 
     def __init_hidden(self):
@@ -40,8 +43,8 @@ class ArtistLSTM(nn.Module):
         Initializes our hidden states with the dimensions specified by the constructor parameters.
         The axes semantics are: (num_layers, minibatch_size, hidden_dim)
         """
-        return (torch.zeros(1, 1, self.hidden_dim),
-                torch.zeros(1, 1, self.hidden_dim))
+        return (torch.zeros(1, 1, self.hidden_dim).to(device),
+                torch.zeros(1, 1, self.hidden_dim).to(device))
 
     def forward(self, lyrics):
         """
@@ -99,7 +102,7 @@ class ArtistLSTM(nn.Module):
         import time
 
         # Declare our loss functions and optimizers
-        loss = loss_fn()
+        loss = loss_fn().to(device)
         optimizer = opt_algo(self.parameters(), lr=learning_rate)
 
         # Loop over every epoch
@@ -120,8 +123,8 @@ class ArtistLSTM(nn.Module):
                 if len(batch) < batch_size:
                     break
 
-                in_mat = torch.zeros(batch_size, self.max_input_length, dtype=torch.long)
-                out_vec = torch.zeros(len(batch), dtype=torch.long)
+                in_mat = torch.zeros(batch_size, self.max_input_length, dtype=torch.long).to(device)
+                out_vec = torch.zeros(len(batch), dtype=torch.long).to(device)
 
                 for i, (artist, lyrics) in enumerate(batch):
                     out_vec[i] = artist
@@ -194,6 +197,7 @@ def run_genre_net(train=True):
         print("Unpickled the genre dictionary.")
     else:
         genre_dict = tokenize_csv_pandas('../lyrics.csv')
+        pickle_object(genre_dict, 'genre.pickle')
         print("Tokenized the genre dictionary from the csv file.")
 
     # Remove "Other" and "Not Available" genres from the dictionary
@@ -207,6 +211,7 @@ def run_genre_net(train=True):
     input_data = build_genre_input_data(genre_dict, vocab_index, genre_indices)
 
     # Shuffle our input data and split it into 20% test, 80% training data
+    random.seed(69)
     random.shuffle(input_data)
     training_length = int(0.8 * len(input_data))
 
@@ -246,7 +251,8 @@ def run_artist_net(train=True):
         artist_dict = unpickle_object('artists.pickle')
         print("Unpickled the artist dictionary.")
     else:
-        artist_dict = tokenize_csv('../songdata.csv')
+        artist_dict = tokenize_csv('../songdata.csv', 0, 1, 3)
+        pickle_object(artist_dict, 'artists.pickle')
         print("Tokenized the artist dictionary from the csv file.")
 
     vocab_index = create_vocab_index(artist_dict)
@@ -256,6 +262,7 @@ def run_artist_net(train=True):
     input_data = build_input_data(artist_dict, vocab_index, artist_indices)
 
     # Shuffle our input data and split it into 20% test, 80% training data
+    random.seed(69)
     random.shuffle(input_data)
     training_length = int(0.8 * len(input_data))
 
@@ -264,8 +271,8 @@ def run_artist_net(train=True):
 
     # If the training argument was set to True, train a newly constructed network using the following hyperparameters
     if train:
-        EMBEDDING_DIM = 100
-        HIDDEN_DIM = 8
+        EMBEDDING_DIM = 150
+        HIDDEN_DIM = 80
         OUTPUT_SIZE = len(artist_dict)
         VOCAB_SIZE = len(vocab_index)
         MAX_INPUT_LEN = 300
@@ -273,17 +280,18 @@ def run_artist_net(train=True):
         net = ArtistLSTM(EMBEDDING_DIM, HIDDEN_DIM, OUTPUT_SIZE, VOCAB_SIZE, MAX_INPUT_LEN)
 
         print("Training network...")
-        net.train_network(training_data, batch_size=64, num_epochs=20, learning_rate=0.005)
+        net.train_network(training_data, batch_size=128, num_epochs=20, learning_rate=0.005)
+        pickle_object(net, 'rnn.pickle')
     else:
         net = unpickle_object('rnn.pickle') # NOTE: This will throw an error if there is no pickle!
 
     # Test the trained network with k closest predicted neighbors
     print("Testing the network...")
-    net.test(test_data, k=2)
+    net.test(test_data, k=3)
 
 
 if __name__ == '__main__':
     import os.path
 
-    # run_artist_net()
-    run_genre_net(train=False)
+    run_artist_net(train=True)
+    # run_genre_net(train=False)
