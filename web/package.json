@@ -1,0 +1,23 @@
+{
+  "name": "nlp_f18",
+  "version": "1.0.0",
+  "description": "a python project for artist representations from lyrics",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onocy/nlp_f18.git"
+  },
+  "author": "Phillip Michalowski",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/onocy/nlp_f18/issues"
+  },
+  "homepage": "https://github.com/onocy/nlp_f18#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}

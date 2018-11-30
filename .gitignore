@@ -1,1 +1,5 @@
 .pdf
+/web/.node_modules/
+.idea/
+__pycache__/
+glove.6B.50d.txt
