@@ -240,3 +240,27 @@ def lyrics_to_word_matrix(lyrics, vocab):
             M[i] = embedding
 
     return M
+
+
+def build_distance_matrix(artists, artist_index):
+    """
+    Builds a Euclidean Distance Matrix (EDM) from the unpickled `rnn.pickle` network object and artists
+    Returns:
+        np.ndarray: A square matrix A with entry (i,j) containing the Euclidean distance from artist i to artist j
+    """
+    from util.io_helper import unpickle_object
+    from rnn import ArtistLSTM
+
+    n = len(artists)
+    net = unpickle_object('rnn.pickle')
+    p = [np.array(x.detach()) for x in net.out.weight]
+    EDM = np.zeros((n, n))
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                a1, a2 = artist_index[artists[i]], artist_index[artists[j]]
+                dist = np.linalg.norm(p[a1] - p[a2])
+                EDM[i][j] = dist
+            else:
+                EDM[i][j] = float('inf')
+    return EDM
