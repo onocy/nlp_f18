@@ -218,3 +218,25 @@ def build_genre_input_data(genre_dict, vocab_index, genre_indices):
                     songs_per_genre[genre] += 1
 
     return input_set
+
+
+def lyrics_to_word_matrix(lyrics, vocab):
+    """
+    Converts a string of song lyrics to a matrix whose rows are word embedding vectors
+    Args:
+        lyrics (list[str]): A list of strings representing a song
+        vocab (dict[str: np.ndarray]): A dictionary mapping words to their embedding vectors
+    Returns:
+        np.ndarray: A (len(lyrics) x embedding_size) matrix with a word embedding row for each word in the lyric string
+    """
+
+    # We need some way to determine the size of each of the word embeddings. Here we are assuming the vocabulary
+    # has an embedding for the word 'a', which seems like a reasonable assumption given the scope of this project
+    M = np.zeros((len(lyrics), len(vocab['a'])))
+
+    for i, word in enumerate(lyrics):
+        embedding = vocab.get(word)
+        if embedding is not None:
+            M[i] = embedding
+
+    return M
