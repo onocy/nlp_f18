@@ -264,3 +264,19 @@ def build_distance_matrix(artists, artist_index):
             else:
                 EDM[i][j] = float('inf')
     return EDM
+
+
+def build_uniqueness_coefficient(artists, artist_index):
+    """
+    Builds an array where each element is the uniqueness coefficient C_i of each artist. We define the uniqueness
+    coefficient as C_i = ∑ dist(a_i, a_j) for every artist a_j, with dist(a_i, a_i) = 0
+    Returns:
+        np.ndarray: A unit vector with entry i containing the uniqueness coefficient of artist i
+    """
+
+    # Fill the diagonal entries of the EDM with 0 so we don't get infinite sums
+    EDM = build_distance_matrix(artists, artist_index)
+    np.fill_diagonal(EDM, 0)
+    U = sum(EDM)
+
+    return U / np.linalg.norm(U)
