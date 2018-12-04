@@ -2,6 +2,27 @@
 """
 
 import numpy as np
+import nltk
+import re
+import pandas as pd
+
+
+def tokenize_string(s, regex=None):
+    """
+    Tokenizes a string into a list of words
+    Args:
+        s (str): The string to be tokenized
+    Optional:
+        regex (re.Pattern): A compiled regex pattern that specifies which characters in the string to remove
+    Returns:
+        list[str]: A list of tokenized words
+    """
+
+    import re
+
+    if regex:
+        s = re.sub(regex, '', s)
+    return nltk.word_tokenize(s)
 
 
 def tokenize_csv(f, artist_col, song_col, lyric_col):
@@ -17,12 +38,8 @@ def tokenize_csv(f, artist_col, song_col, lyric_col):
           of words in each song
     """
 
-    import nltk
     import csv
     import re
-
-    # TODO: To save time, avoid performing this check if punkt is already downloaded.
-    nltk.download('punkt')
 
     artists = {}
     with open(f) as file:
@@ -34,12 +51,49 @@ def tokenize_csv(f, artist_col, song_col, lyric_col):
         for row in file_csv:
             artist = row[artist_col]
             song = row[song_col]
-            lyrics = nltk.word_tokenize(re.sub('\'|,|\(|\)|\?|\!|\.|\[|\]|`|:|...', '', row[lyric_col].lower()))
+            lyrics = tokenize_string(row[lyric_col].lower(), regex=re.compile('\'|,|\(|\)|\?|\!'))
             if artist not in artists:
                 artists[artist] = {}
             artists[artist][song] = lyrics
 
     return artists
+
+
+def tokenize_csv_pandas(f):
+    """
+    Tokenizes and imports a genre-artist-song CSV into a python dictionary
+    Args:
+        f (str): The path to a CSV dataset
+    Returns:
+        dict[str, dict[str, dict[str, list[str]]]: A dictionary mapping genres to artists to songs to a list of lyrics
+    """
+    p = pd.read_csv(f)
+    d = {}
+    for _, val in p.iterrows():
+        genre = val["genre"]
+        artist = val["artist"]
+        song = val["song"]
+        lyrics = clean_lyrics(val["lyrics"])
+
+        if genre not in d: 
+            d[genre] = {}
+        if artist not in d[genre]: 
+            d[genre][artist] = {}
+        
+        d[genre][artist][song] = tokenize_string(lyrics, regex=re.compile('[^\w\s]+'))
+
+    return d
+
+
+def clean_lyrics(s):
+    """
+    Cleans a lyrics string `s` by converting all newlines and commas to spaces
+    Args:
+        s (str): A string of lyrics
+    Returns:
+        str: A cleaned string with newlines and commas replaced by spaces
+    """
+    return re.sub('\n|,', ' ', s)
 
 
 def load_word_embeddings(f, unzip=False):
@@ -81,6 +135,7 @@ def pickle_object(obj, filename):
 
     outfile = open(filename, 'wb')
     pickle.dump(obj, outfile)
+
 
 def unpickle_object(filename):
     """
