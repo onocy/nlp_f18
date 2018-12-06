@@ -242,6 +242,27 @@ def lyrics_to_word_matrix(lyrics, vocab):
     return M
 
 
+def build_learner_distance_matrix(embeddings, artists, artist_index):
+    """
+    Builds a Euclidean Distance Matrix (EDM) from the unpickled learner model object and artists
+    Returns:
+        np.ndarray: A square matrix A with entry (i,j) containing the Euclidean distance from artist i to artist j
+    """
+
+    n = len(artists)
+    p = embeddings
+    EDM = np.zeros((n, n))
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                a1, a2 = artist_index[artists[i]], artist_index[artists[j]]
+                dist = np.linalg.norm(p[a1] - p[a2])
+                EDM[i][j] = dist
+            else:
+                EDM[i][j] = float('inf')
+    return EDM
+
+
 def build_distance_matrix(artists, artist_index):
     """
     Builds a Euclidean Distance Matrix (EDM) from the unpickled `rnn.pickle` network object and artists
@@ -264,6 +285,21 @@ def build_distance_matrix(artists, artist_index):
             else:
                 EDM[i][j] = float('inf')
     return EDM
+
+def build_uniqueness_coefficient(artists, artist_index):
+    """
+    Builds an array where each element is the uniqueness coefficient C_i of each artist. We define the uniqueness
+    coefficient as C_i = ∑ dist(a_i, a_j) for every artist a_j, with dist(a_i, a_i) = 0
+    Returns:
+        np.ndarray: A unit vector with entry i containing the uniqueness coefficient of artist i
+    """
+
+    # Fill the diagonal entries of the EDM with 0 so we don't get infinite sums
+    EDM = build_distance_matrix(artists, artist_index)
+    np.fill_diagonal(EDM, 0)
+    U = sum(EDM)
+
+    return U / np.linalg.norm(U)
 
 def nearest_neighbors(E, av, k):
     """

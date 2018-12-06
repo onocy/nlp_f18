@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 
+from learner import Learner
+from rnn import ArtistLSTM
 
 def plot_coords_with_labels(coord_dict):
     """
@@ -28,19 +30,51 @@ def create_correlation_plot(EDM, artists):
     fig.show()
     plt.pause(500)
 
-if __name__ == '__main__':
+
+def plot_rnn_heatmap(selected_artists):
     from util.io_helper import unpickle_object
     from util.computation import create_artist_index, build_distance_matrix
-    from rnn import ArtistLSTM
 
-    # First load the artist dictionary and choose a subset of the artists to compare
+    # First load the artist dictionary and create the artist indices
     artist_dict = unpickle_object('artists.pickle')
     artist_index = create_artist_index(artist_dict)
-    selected_artists = ['Kanye West', 'Michael Jackson', 'Drake', 'Eminem', 'Stevie Wonder', 'Madonna', 'Lil Wayne',
-                        'Rihanna', 'Bon Jovi', 'Linkin Park', 'Young Jeezy', 'The Beatles', 'Britney Spears', 'Coldplay']
 
     # Build the distance matrix from the selected artists and their index mappings
     EDM = build_distance_matrix(selected_artists, artist_index)
 
     # Plot the correlation heat map!
     create_correlation_plot(EDM, selected_artists)
+
+
+def plot_learner_heatmap(selected_artists):
+    from util.io_helper import unpickle_object
+    from util.computation import create_artist_index, build_distance_matrix, build_learner_distance_matrix
+
+    # First load the learner.pickle model and extract the learned artists
+    learner = unpickle_object('learner.pickle')
+    artist_embeddings = learner.learn_artists()
+
+    # Create our artist index mappings
+    artist_index = create_artist_index(artist_embeddings)
+
+    # Extract the artist embeddings from the artist embedding dictionary in sorted order
+    embeddings_list = [artist_embeddings[artist] for artist in sorted(artist_embeddings.keys())]
+
+    # Build the distance matrix from the selected artists and their index mappings
+    EDM = build_learner_distance_matrix(embeddings_list, selected_artists, artist_index)
+
+    # Plot the correlation heat maps
+    create_correlation_plot(EDM, selected_artists)
+
+
+if __name__ == '__main__':
+
+    # Choose which artists we want to plot the heatmap for
+    selected_artists = ['Kanye West', 'Michael Jackson', 'Drake', 'Eminem', 'Stevie Wonder', 'Madonna', 'Lil Wayne',
+                        'Rihanna', 'Bon Jovi', 'Linkin Park', 'Young Jeezy', 'The Beatles', 'Britney Spears', 'Coldplay']
+
+    # We can plot these artists using the embeddings from the trained baseline model (Learner), or the RNN (or both!)
+
+    plot_learner_heatmap(selected_artists)
+    # plot_rnn_heatmap(selected_artists)
+
