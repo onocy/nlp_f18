@@ -56,8 +56,6 @@ def plot_learner_heatmap(selected_artists):
 
     # Create our artist index mappings
     artist_index = create_artist_index(artist_embeddings)
-    selected_artists = ['Kanye West', 'Michael Jackson', 'Drake', 'Eminem', 'Stevie Wonder', 'Madonna', 'Lil Wayne',
-                        'Rihanna', 'Bon Jovi', 'Linkin Park', 'Young Jeezy', 'The Beatles', 'Britney Spears', 'Coldplay']
 
     # Extract the artist embeddings from the artist embedding dictionary in sorted order
     embeddings_list = [artist_embeddings[artist] for artist in sorted(artist_embeddings.keys())]
