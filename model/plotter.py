@@ -31,15 +31,13 @@ def create_correlation_plot(EDM, artists):
     plt.pause(500)
 
 
-def plot_rnn_heatmap():
+def plot_rnn_heatmap(selected_artists):
     from util.io_helper import unpickle_object
     from util.computation import create_artist_index, build_distance_matrix
 
-    # First load the artist dictionary and choose a subset of the artists to compare
+    # First load the artist dictionary and create the artist indices
     artist_dict = unpickle_object('artists.pickle')
     artist_index = create_artist_index(artist_dict)
-    selected_artists = ['Kanye West', 'Michael Jackson', 'Drake', 'Eminem', 'Stevie Wonder', 'Madonna', 'Lil Wayne',
-                        'Rihanna', 'Bon Jovi', 'Linkin Park', 'Young Jeezy', 'The Beatles', 'Britney Spears', 'Coldplay']
 
     # Build the distance matrix from the selected artists and their index mappings
     EDM = build_distance_matrix(selected_artists, artist_index)
@@ -48,10 +46,9 @@ def plot_rnn_heatmap():
     create_correlation_plot(EDM, selected_artists)
 
 
-def plot_learner_heatmap():
+def plot_learner_heatmap(selected_artists):
     from util.io_helper import unpickle_object
     from util.computation import create_artist_index, build_distance_matrix, build_learner_distance_matrix
-
 
     # First load the learner.pickle model and extract the learned artists
     learner = unpickle_object('learner.pickle')
@@ -73,5 +70,13 @@ def plot_learner_heatmap():
 
 
 if __name__ == '__main__':
-    # plot_rnn_heatmap()
-    plot_learner_heatmap()
+
+    # Choose which artists we want to plot the heatmap for
+    selected_artists = ['Kanye West', 'Michael Jackson', 'Drake', 'Eminem', 'Stevie Wonder', 'Madonna', 'Lil Wayne',
+                        'Rihanna', 'Bon Jovi', 'Linkin Park', 'Young Jeezy', 'The Beatles', 'Britney Spears', 'Coldplay']
+
+    # We can plot these artists using the embeddings from the trained baseline model (Learner), or the RNN (or both!)
+
+    plot_learner_heatmap(selected_artists)
+    # plot_rnn_heatmap(selected_artists)
+
