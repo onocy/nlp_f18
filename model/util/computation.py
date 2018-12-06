@@ -286,7 +286,6 @@ def build_distance_matrix(artists, artist_index):
                 EDM[i][j] = float('inf')
     return EDM
 
-
 def build_uniqueness_coefficient(artists, artist_index):
     """
     Builds an array where each element is the uniqueness coefficient C_i of each artist. We define the uniqueness
@@ -301,3 +300,19 @@ def build_uniqueness_coefficient(artists, artist_index):
     U = sum(EDM)
 
     return U / np.linalg.norm(U)
+
+def nearest_neighbors(E, av, k):
+    """
+    Finds the nearest neighbor the given artist vector in a set of learned artist vectors
+    Args:
+        E  (dict[str, np.ndarray]): A dictionary mapping artist names to the artist embedding
+        av (np.ndarray): A vector representing an arbitrary artist
+        k : number of nearest neighbors to return
+    Returns:
+        list: A list of tuples containing the k closest artist vector in E and its similarity metric
+    """
+    import scipy as sp
+
+    similarities = map(lambda x: (x[0], sp.spatial.distance.cosine(x[1], av)), E.items())
+    sorted_similarities = sorted(similarities, key=lambda x: x[1])
+    return sorted_similarities[:k]
